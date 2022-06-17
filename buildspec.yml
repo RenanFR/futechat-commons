@@ -15,7 +15,6 @@ phases:
     - export M2_HOME=/opt/apache-maven-3.8.6
     - export PATH=${M2_HOME}/bin:${PATH}
     - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain agama --domain-owner 270167558056 --query authorizationToken --output text --region us-east-1`
-    - echo $CODEARTIFACT_AUTH_TOKEN
     - . ~/.profile    
   build: 
     commands: 
