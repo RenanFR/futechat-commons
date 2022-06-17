@@ -11,13 +11,25 @@
 	<artifactId>futechat-commons</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>futechat-commons</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Biblioteca com os elementos comuns das aplicacoes futechat</description>
 	<packaging>jar</packaging>
 	<properties>
 		<java.version>18</java.version>
 		<spring.cloud-version>2021.0.3</spring.cloud-version>
 		<org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
 	</properties>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>agama-agama</id>
+			<url>https://agama-270167558056.d.codeartifact.us-east-1.amazonaws.com/maven/agama/</url>
+		</snapshotRepository>
+		<repository>
+			<id>agama-agama</id>
+			<name>agama-agama</name>
+			<url>https://agama-270167558056.d.codeartifact.us-east-1.amazonaws.com/maven/agama/</url>
+		</repository>
+	</distributionManagement>
 
 	<dependencyManagement>
 		<dependencies>
@@ -77,13 +89,13 @@
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
-		</dependency>		
-
+		</dependency>
+		
 	</dependencies>
 
 	<build>
