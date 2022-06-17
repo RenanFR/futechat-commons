@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: futechat-commons
+
+apiFootball:
+  url: https://api-football-v1.p.rapidapi.com/v3
+  host: api-football-v1.p.rapidapi.com

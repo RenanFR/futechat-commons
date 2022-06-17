@@ -1,0 +1,22 @@
+{
+	"priority": 1,
+	"request": {
+		"method": "GET",
+		"urlPath": "/leagues",
+		"queryParameters": {
+			"name": {
+				"equalTo": "Desimpedidos"
+			},
+			"season": {
+				"equalTo": "2021"
+			}
+		}
+	},
+	"response": {
+		"status": 200,
+		"bodyFileName": "league-not-found-sample-response.json",
+		"headers": {
+			"Content-Type": "application/json"
+		}
+	}
+}

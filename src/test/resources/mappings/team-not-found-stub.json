@@ -1,0 +1,18 @@
+{
+	"request": {
+		"method": "GET",
+		"urlPath": "/teams",
+		"queryParameters": {
+			"name": {
+				"equalTo": "ESPN"
+			}
+		}
+	},
+	"response": {
+		"status": 200,
+		"bodyFileName": "team-not-found-sample-response.json",
+		"headers": {
+			"Content-Type": "application/json"
+		}
+	}
+}

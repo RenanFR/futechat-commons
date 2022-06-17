@@ -1,0 +1,21 @@
+{
+	"request": {
+		"method": "GET",
+		"urlPath": "/players",
+		"queryParameters": {
+			"search": {
+				"equalTo": "Neymar"
+			},
+			"team": {
+				"equalTo": "85"
+			}
+		}
+	},
+	"response": {
+		"status": 200,
+		"bodyFileName": "neymar-sample-response.json",
+		"headers": {
+			"Content-Type": "application/json"
+		}
+	}
+}

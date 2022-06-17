@@ -1,0 +1,21 @@
+{
+	"request": {
+		"method": "GET",
+		"urlPathPattern": "/teams",
+		"queryParameters": {
+			"season": {
+				"matches": ".*"
+			},
+			"league": {
+				"matches": ".*"
+			}
+		}
+	},
+	"response": {
+		"status": 200,
+		"bodyFileName": "teams-sample-response.json",
+		"headers": {
+			"Content-Type": "application/json"
+		}
+	}
+}
