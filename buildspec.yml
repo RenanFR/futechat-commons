@@ -19,5 +19,6 @@ phases:
     - . ~/.profile    
   build: 
     commands: 
-    - echo Build started on `date` 
+    - echo Build started on `date`
+    - cp ./settings.xml /root/.m2/settings.xml 
     - mvn clean deploy
