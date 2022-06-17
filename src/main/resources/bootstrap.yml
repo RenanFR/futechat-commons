@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: futechat
+    
+aws:
+  paramstore:
+    defaultContext: application
+    prefix: /config
+    profileSeparator: _
+    enabled: true
+    failFast: true
