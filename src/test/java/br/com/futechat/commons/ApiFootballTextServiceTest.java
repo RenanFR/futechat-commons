@@ -4,7 +4,6 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;

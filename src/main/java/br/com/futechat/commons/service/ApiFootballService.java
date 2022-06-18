@@ -1,6 +1,9 @@
 package br.com.futechat.commons.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,8 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.futechat.commons.api.client.ApiFootballClient;
+import br.com.futechat.commons.api.model.ApiFootballFixtureRequest;
+import br.com.futechat.commons.api.model.ApiFootballFixturesStatus;
 import br.com.futechat.commons.api.model.ApiFootballLeague;
 import br.com.futechat.commons.api.model.ApiFootballLeagueResponse;
+import br.com.futechat.commons.api.model.ApiFootballLive;
 import br.com.futechat.commons.api.model.ApiFootballPlayer;
 import br.com.futechat.commons.api.model.ApiFootballPlayerGoals;
 import br.com.futechat.commons.api.model.ApiFootballPlayerStatistics;
@@ -25,6 +31,7 @@ import br.com.futechat.commons.exception.LeagueNotFoundException;
 import br.com.futechat.commons.exception.PlayerNotFoundException;
 import br.com.futechat.commons.exception.TeamNotFoundException;
 import br.com.futechat.commons.mapper.FutechatMapper;
+import br.com.futechat.commons.model.Match;
 import br.com.futechat.commons.model.PlayerTransferHistory;
 import br.com.futechat.commons.model.Transfer;
 
@@ -100,6 +107,40 @@ public class ApiFootballService implements FutechatService {
 				.collect(Collectors.toList());
 		return topScorers;
 
+	}
+
+	@Override
+	public List<Match> getMatchesScheduleFor(ApiFootballFixtureRequest request) {
+		Map<String, String> parameters = new HashMap<String, String>();
+		Optional.ofNullable(request.id()).ifPresent(id -> parameters.put("id", id.toString()));
+		Optional.ofNullable(request.ids())
+				.ifPresent(ids -> parameters.put("ids", ids.stream().collect(Collectors.joining("-"))));
+		Optional.ofNullable(request.live())
+				.ifPresent(live -> parameters.put("live", live == ApiFootballLive.ALL ? ApiFootballLive.ALL.getValue()
+						: request.ids().stream().collect(Collectors.joining("-"))));
+		Optional.ofNullable(request.date())
+				.ifPresent(date -> parameters.put("date", date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
+		Optional.ofNullable(request.league()).ifPresent(league -> parameters.put("league", league.toString()));
+		Optional.ofNullable(request.season()).ifPresent(season -> parameters.put("season", season.toString()));
+		Optional.ofNullable(request.season()).ifPresent(team -> parameters.put("team", team.toString()));
+		Optional.ofNullable(request.last()).ifPresent(last -> parameters.put("last", last.toString()));
+		Optional.ofNullable(request.next()).ifPresent(next -> parameters.put("next", next.toString()));
+		Optional.ofNullable(request.from())
+				.ifPresent(from -> parameters.put("from", from.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
+		Optional.ofNullable(request.to())
+				.ifPresent(to -> parameters.put("to", to.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
+		Optional.ofNullable(request.round()).ifPresent(round -> parameters.put("round", round.toString()));
+		Optional.ofNullable(request.status())
+				.ifPresent(status -> parameters.put("status", status == ApiFootballFixturesStatus._1H ? "1H"
+						: status == ApiFootballFixturesStatus._2H ? "2H" : status.name()));
+		Optional.ofNullable(request.venue()).ifPresent(venue -> parameters.put("venue", venue.toString()));
+		Optional.ofNullable(request.timezone()).ifPresent(timezone -> parameters.put("timezone", timezone.toString()));
+		List<Match> matchList = apiFootballClient.fixtures(parameters).response().stream()
+				.map(fixture -> new Match(fixture.teams().home().name(), fixture.teams().away().name(),
+						fixture.goals().home(), fixture.goals().away(),
+						LocalDateTime.parse(fixture.fixture().date(), DateTimeFormatter.ISO_OFFSET_DATE_TIME)))
+				.collect(Collectors.toList());
+		return matchList;
 	}
 
 }

@@ -1,0 +1,21 @@
+{
+	"request": {
+		"method": "GET",
+		"urlPathPattern": "/fixtures",
+		"queryParameters": {
+			"date": {
+				"matches": ".*"
+			},
+			"league": {
+				"matches": ".*"
+			}
+		}
+	},
+	"response": {
+		"status": 200,
+		"bodyFileName": "fixtures-sample-response.json",
+		"headers": {
+			"Content-Type": "application/json"
+		}
+	}
+}

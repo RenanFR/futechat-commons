@@ -7,6 +7,7 @@ import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import br.com.futechat.commons.api.model.ApiFootballFixturesResponse;
 import br.com.futechat.commons.api.model.ApiFootballLeagueResponse;
 import br.com.futechat.commons.api.model.ApiFootballPlayersResponse;
 import br.com.futechat.commons.api.model.ApiFootballResponse;
@@ -33,4 +34,7 @@ public interface ApiFootballClient {
 
 	@RequestMapping(method = RequestMethod.GET, value = "players/topscorers", consumes = "application/json")
 	ApiFootballResponse<ApiFootballPlayersResponse> topScorers(@SpringQueryMap Map<String, String> queryParameters);
+	
+	@RequestMapping(method = RequestMethod.GET, value = "fixtures", consumes = "application/json")
+	ApiFootballResponse<ApiFootballFixturesResponse> fixtures(@SpringQueryMap Map<String, String> queryParameters);
 }

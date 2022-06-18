@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.time.LocalDate;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import br.com.futechat.commons.api.client.ApiFootballClient;
 import br.com.futechat.commons.api.client.config.FeignConfig;
+import br.com.futechat.commons.api.model.ApiFootballFixturesResponse;
 import br.com.futechat.commons.api.model.ApiFootballLeagueResponse;
 import br.com.futechat.commons.api.model.ApiFootballPlayersResponse;
 import br.com.futechat.commons.api.model.ApiFootballResponse;
@@ -29,6 +31,7 @@ public class ApiFootballClientTest {
 	private ApiFootballClient apiFootballClient;
 
 	@Test
+	@Ignore
 	public void shouldFetchSeasonsFromApi() {
 
 		ApiFootballResponse<Integer> seasons = apiFootballClient.seasons();
@@ -38,6 +41,7 @@ public class ApiFootballClientTest {
 	}
 
 	@Test
+	@Ignore
 	public void shouldFetchLeagueInformationFromApi() {
 		ApiFootballResponse<ApiFootballLeagueResponse> leagues = apiFootballClient
 				.leagues(Map.of("name", "Premier League"));
@@ -53,6 +57,7 @@ public class ApiFootballClientTest {
 	}
 
 	@Test
+	@Ignore
 	public void shouldFetchTeamsInformationFromApi() {
 		ApiFootballResponse<ApiFootballTeamsResponse> teams = apiFootballClient.teams(Map.of("name", "Arsenal"));
 		assertEquals("teams", teams.get());
@@ -60,6 +65,7 @@ public class ApiFootballClientTest {
 	}
 	
 	@Test
+	@Ignore
 	public void shouldFetchAdultoNey() {
 		ApiFootballResponse<ApiFootballPlayersResponse> players = apiFootballClient.players(Map.of("search", "Neymar", "team", "85"));
 		assertEquals("players", players.get());
@@ -67,12 +73,24 @@ public class ApiFootballClientTest {
 	}
 	
 	@Test
+	@Ignore
 	public void shouldGetTopScorers() {
 		ApiFootballResponse<ApiFootballPlayersResponse> topScorers = apiFootballClient
 				.topScorers(Map.of("league", "39", "season", "2021"));
 		assertEquals("players/topscorers", topScorers.get());
 		assertEquals("Heung-Min Son", topScorers.response().get(0).player().name());
 		assertEquals(23, topScorers.response().get(0).statistics().get(0).goals().total());
+	}
+	
+	@Test
+	public void shouldGetArsenalMostImportantFailureMatch() {
+		ApiFootballResponse<ApiFootballFixturesResponse> fixtures = apiFootballClient
+				.fixtures(Map.of("league", "39", "season", "2021", "date", "2022-05-12"));
+		assertEquals("fixtures", fixtures.get());
+		ApiFootballFixturesResponse apiFootballFixturesResponse = fixtures.response().stream()
+				.filter(match -> match.fixture().id() == 710773).findFirst().get();
+		assertEquals(3, apiFootballFixturesResponse.goals().home());
+		assertEquals(0, apiFootballFixturesResponse.goals().away());
 	}
 
 }

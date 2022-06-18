@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.javatuples.Pair;
 import org.springframework.stereotype.Service;
 
+import br.com.futechat.commons.api.model.ApiFootballFixtureRequest;
+import br.com.futechat.commons.model.Match;
 import br.com.futechat.commons.model.PlayerTransferHistory;
 
 @Service
@@ -24,6 +26,12 @@ public class TestingFutechatService implements FutechatService {
 
 	@Override
 	public List<Pair<String, Integer>> getLeagueTopScorersForTheSeason(Integer seasonYear, String leagueName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Match> getMatchesScheduleFor(ApiFootballFixtureRequest request) {
 		// TODO Auto-generated method stub
 		return null;
 	}
