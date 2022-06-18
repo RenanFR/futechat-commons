@@ -20,5 +20,6 @@ phases:
     commands: 
     - echo Build started on `date`
     - cp ./settings.xml /root/.m2/settings.xml 
-    - mvn test -Dspring.config.name=futechat-commons
+    - mvn test
+    - mvn validate -DbumpMajor
     - mvn clean deploy
