@@ -19,6 +19,7 @@ import br.com.futechat.commons.api.model.ApiFootballFixturesResponse;
 import br.com.futechat.commons.api.model.ApiFootballLeagueResponse;
 import br.com.futechat.commons.api.model.ApiFootballPlayersResponse;
 import br.com.futechat.commons.api.model.ApiFootballResponse;
+import br.com.futechat.commons.api.model.ApiFootballStatisticsResponse;
 import br.com.futechat.commons.api.model.ApiFootballTeamsResponse;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -79,6 +80,18 @@ public class ApiFootballClientTest {
 				.filter(match -> match.fixture().id() == 710773).findFirst().get();
 		assertEquals(3, apiFootballFixturesResponse.goals().home());
 		assertEquals(0, apiFootballFixturesResponse.goals().away());
+	}
+	
+	@Test
+	public void shouldGetArsenalDefeatStatistics() {
+		ApiFootballResponse<ApiFootballStatisticsResponse> fixturesStatistics = apiFootballClient
+				.fixturesStatistics(Map.of("fixture", "710773"));
+		assertEquals("fixtures/statistics", fixturesStatistics.get());
+		String redCards = fixturesStatistics.response().stream()
+				.filter(statistics -> statistics.team().name().equals("Arsenal"))
+				.flatMap(statistics -> statistics.statistics().stream())
+				.filter(statistics -> statistics.type().equals("Red Cards")).findFirst().get().value();
+		assertEquals("1", redCards);
 	}
 
 }

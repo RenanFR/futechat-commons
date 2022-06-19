@@ -89,4 +89,11 @@ public class ApiFootballServiceTest {
 		assertEquals("Anderson Daronco", choqueRei.referee());
 	}
 	
+	@Test
+	public void shouldGetArsenalDefeatStatistics() {
+		Match fixtureStatistics = futechatService.getFixtureStatistics("Tottenham", "Arsenal", LocalDate.of(2022, 5, 12));
+		assertNotNull(fixtureStatistics);
+		assertEquals(1, fixtureStatistics.awayTeamStatistics().redCards());
+	}
+	
 }

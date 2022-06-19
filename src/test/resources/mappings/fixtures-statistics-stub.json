@@ -1,0 +1,18 @@
+{
+	"request": {
+		"method": "GET",
+		"urlPathPattern": "/fixtures/statistics",
+		"queryParameters": {
+			"fixture": {
+				"equalTo": "710773"
+			}
+		}
+	},
+	"response": {
+		"status": 200,
+		"bodyFileName": "fixtures-statistics-sample-response.json",
+		"headers": {
+			"Content-Type": "application/json"
+		}
+	}
+}

@@ -11,6 +11,7 @@ import br.com.futechat.commons.api.model.ApiFootballFixturesResponse;
 import br.com.futechat.commons.api.model.ApiFootballLeagueResponse;
 import br.com.futechat.commons.api.model.ApiFootballPlayersResponse;
 import br.com.futechat.commons.api.model.ApiFootballResponse;
+import br.com.futechat.commons.api.model.ApiFootballStatisticsResponse;
 import br.com.futechat.commons.api.model.ApiFootballTeamsResponse;
 import br.com.futechat.commons.api.model.ApiFootballTransfersResponse;
 
@@ -37,4 +38,7 @@ public interface ApiFootballClient {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "fixtures", consumes = "application/json")
 	ApiFootballResponse<ApiFootballFixturesResponse> fixtures(@SpringQueryMap Map<String, String> queryParameters);
+	
+	@RequestMapping(method = RequestMethod.GET, value = "fixtures/statistics", consumes = "application/json")
+	ApiFootballResponse<ApiFootballStatisticsResponse> fixturesStatistics(@SpringQueryMap Map<String, String> queryParameters);
 }

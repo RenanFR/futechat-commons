@@ -96,5 +96,13 @@ public class ApiFootballTextServiceTest {
 		assertNotNull(soccerMatchesForTomorrow);
 		assertTrue(soccerMatchesForTomorrow.contains("Sao Paulo X Palmeiras -> 20/06/2022 23:00"));
 	}
+	
+	@Test
+	public void shouldGetArsenalDefeatStatistics() {
+		String fixtureStatisticsText = apiFootballTextService.getFixtureStatistics("Tottenham", "Arsenal", LocalDate.of(2022, 5, 12));
+		assertNotNull(fixtureStatisticsText);
+		assertTrue(fixtureStatisticsText.contains("Tottenham(3) X Arsenal(0):"));
+		assertTrue(fixtureStatisticsText.contains("Cartões vermelhos | 0 | 1"));
+	}
 
 }

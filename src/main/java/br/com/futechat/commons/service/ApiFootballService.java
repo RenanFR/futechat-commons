@@ -28,6 +28,9 @@ import br.com.futechat.commons.api.model.ApiFootballPlayerGoals;
 import br.com.futechat.commons.api.model.ApiFootballPlayerStatistics;
 import br.com.futechat.commons.api.model.ApiFootballPlayersResponse;
 import br.com.futechat.commons.api.model.ApiFootballResponse;
+import br.com.futechat.commons.api.model.ApiFootballStatistics;
+import br.com.futechat.commons.api.model.ApiFootballStatisticsResponse;
+import br.com.futechat.commons.api.model.ApiFootballStatisticsType;
 import br.com.futechat.commons.api.model.ApiFootballTeam;
 import br.com.futechat.commons.api.model.ApiFootballTeamsResponse;
 import br.com.futechat.commons.api.model.ApiFootballTransfersResponse;
@@ -37,6 +40,7 @@ import br.com.futechat.commons.exception.TeamNotFoundException;
 import br.com.futechat.commons.mapper.FutechatMapper;
 import br.com.futechat.commons.model.Match;
 import br.com.futechat.commons.model.MatchEvent;
+import br.com.futechat.commons.model.MatchStatistics;
 import br.com.futechat.commons.model.PlayerTransferHistory;
 import br.com.futechat.commons.model.Transfer;
 
@@ -175,7 +179,7 @@ public class ApiFootballService implements FutechatService {
 			
 			Match match = new Match(fixture.teams().home().name(), fixture.teams().away().name(), goalsHome, goalsAway,
 					LocalDateTime.parse(fixture.fixture().date(), DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-					fixture.fixture().status().longStatus(), events, fixture.fixture().referee());
+					fixture.fixture().status().longStatus(), events, fixture.fixture().referee(), null, null);
 			return match;
 		};
 	}
@@ -191,6 +195,56 @@ public class ApiFootballService implements FutechatService {
 				.map(ApiFootballLeagueResponse::league).mapToInt(ApiFootballLeague::id).findFirst()
 				.orElseThrow(() -> new LeagueNotFoundException(leagueName));
 		return leagueId;
+	}
+
+	@Override
+	public Match getFixtureStatistics(String homeTeam, String awayTeam, LocalDate matchDate) {
+		ApiFootballResponse<ApiFootballFixturesResponse> matchesOnThatDay = apiFootballClient
+				.fixtures(Map.of("date", matchDate.format(DateTimeFormatter.ofPattern(PATTERN))));
+		ApiFootballFixturesResponse soccerMatchFound = matchesOnThatDay.response().stream().filter(
+				match -> match.teams().home().name().equals(homeTeam) && match.teams().away().name().equals(awayTeam))
+				.findAny().get();
+		Integer fixtureId = soccerMatchFound.fixture().id();
+		List<ApiFootballStatisticsResponse> statisticsResponses = apiFootballClient
+				.fixturesStatistics(Map.of("fixture", fixtureId.toString())).response();
+		Map<String, String> statisticsMapOfHomeTeam = statisticsResponses.stream()
+				.filter(statistics -> statistics.team().name().equals(homeTeam))
+				.map(statistics -> statistics.statistics()).flatMap(statistics -> statistics.stream())
+				.collect(Collectors.toMap(ApiFootballStatistics::type,
+						statistics -> statistics.value() == null ? "0" : statistics.value()));
+		Map<String, String> statisticsMapOfAwayTeam = statisticsResponses.stream()
+				.filter(statistics -> statistics.team().name().equals(awayTeam))
+				.map(statistics -> statistics.statistics()).flatMap(statistics -> statistics.stream())
+				.collect(Collectors.toMap(ApiFootballStatistics::type,
+						statistics -> statistics.value() == null ? "0" : statistics.value()));
+		
+		MatchStatistics statisticsOfHomeTeam = getStatisticsFromRawMap(statisticsMapOfHomeTeam);
+		MatchStatistics statisticsOfAwayTeam = getStatisticsFromRawMap(statisticsMapOfAwayTeam);
+		Match match = new Match(soccerMatchFound.teams().home().name(), soccerMatchFound.teams().away().name(),
+				soccerMatchFound.goals().home(), soccerMatchFound.goals().away(),
+				LocalDateTime.parse(soccerMatchFound.fixture().date(), DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+				soccerMatchFound.fixture().status().longStatus(), List.of(), soccerMatchFound.fixture().referee(),
+				statisticsOfHomeTeam, statisticsOfAwayTeam);
+		return match;
+	}
+
+	private MatchStatistics getStatisticsFromRawMap(Map<String, String> statisticsMapOfHomeTeam) {
+		return new MatchStatistics(Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.SHOTS_ON_GOAL.getRawValue())), 
+				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.SHOTS_OFF_GOAL.getRawValue())), 
+				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.TOTAL_SHOTS.getRawValue())), 
+				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.BLOCKED_SHOTS.getRawValue())), 
+				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.SHOTS_INSIDEBOX.getRawValue())), 
+				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.SHOTS_OUTSIDEBOX.getRawValue())), 
+				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.FOULS.getRawValue())), 
+				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.CORNER_KICKS.getRawValue())), 
+				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.OFFSIDES.getRawValue())), 
+				statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.BALL_POSSESSION.getRawValue()), 
+				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.YELLOW_CARDS.getRawValue())), 
+				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.RED_CARDS.getRawValue())), 
+				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.GOALKEEPER_SAVES.getRawValue())), 
+				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.TOTAL_PASSES.getRawValue())), 
+				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.PASSES_ACCURATE.getRawValue())), 
+				statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.PASSES.getRawValue()));
 	}
 
 }

@@ -87,4 +87,67 @@ public class ApiFootballTextService implements FutechatTextService {
 		return soccerMatchesText;
 	}
 
+	@Override
+	public String getFixtureStatistics(String homeTeam, String awayTeam, LocalDate matchDate) {
+		Match fixtureStatisticsMatch = apiFootballService.getFixtureStatistics("Tottenham", "Arsenal",
+				LocalDate.of(2022, 5, 12));
+		StringBuilder fixtureStatisticsText = new StringBuilder();
+		fixtureStatisticsText
+				.append(fixtureStatisticsMatch.homeTeam() + "(" + fixtureStatisticsMatch.homeScore() + ") " + "X "
+						+ fixtureStatisticsMatch.awayTeam() + "(" + fixtureStatisticsMatch.awayScore() + ")" + ":\n");
+		fixtureStatisticsText.append("Chutes no gol | " + fixtureStatisticsMatch.homeTeamStatistics().shotsOnGoal()
+				+ " | " + fixtureStatisticsMatch.awayTeamStatistics().shotsOnGoal());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText
+				.append("Chutes fora do gol | " + fixtureStatisticsMatch.homeTeamStatistics().shotsOffGoal() + " | "
+						+ fixtureStatisticsMatch.awayTeamStatistics().shotsOffGoal());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText.append("Total de chutes | " + fixtureStatisticsMatch.homeTeamStatistics().totalShots()
+				+ " | " + fixtureStatisticsMatch.awayTeamStatistics().totalShots());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText.append("Chutes bloqueados | " + fixtureStatisticsMatch.homeTeamStatistics().blockedShots()
+				+ " | " + fixtureStatisticsMatch.awayTeamStatistics().blockedShots());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText
+				.append("Finalizações dentro | " + fixtureStatisticsMatch.homeTeamStatistics().shotsInsidebox() + " | "
+						+ fixtureStatisticsMatch.awayTeamStatistics().shotsInsidebox());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText
+				.append("Finalizações fora | " + fixtureStatisticsMatch.homeTeamStatistics().shotsOutsidebox() + " | "
+						+ fixtureStatisticsMatch.awayTeamStatistics().shotsOutsidebox());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText.append("Faltas | " + fixtureStatisticsMatch.homeTeamStatistics().fouls() + " | "
+				+ fixtureStatisticsMatch.awayTeamStatistics().fouls());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText.append("Escanteios | " + fixtureStatisticsMatch.homeTeamStatistics().cornerKicks() + " | "
+				+ fixtureStatisticsMatch.awayTeamStatistics().cornerKicks());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText.append("Impedimentos | " + fixtureStatisticsMatch.homeTeamStatistics().offsides() + " | "
+				+ fixtureStatisticsMatch.awayTeamStatistics().offsides());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText.append("Posse de bola | " + fixtureStatisticsMatch.homeTeamStatistics().ballPossession()
+				+ " | " + fixtureStatisticsMatch.awayTeamStatistics().ballPossession());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText.append("Cartões amarelos | " + fixtureStatisticsMatch.homeTeamStatistics().yellowCards()
+				+ " | " + fixtureStatisticsMatch.awayTeamStatistics().yellowCards());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText.append("Cartões vermelhos | " + fixtureStatisticsMatch.homeTeamStatistics().redCards()
+				+ " | " + fixtureStatisticsMatch.awayTeamStatistics().redCards());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText
+				.append("Defesas do goleiro | " + fixtureStatisticsMatch.homeTeamStatistics().goalkeeperSaves() + " | "
+						+ fixtureStatisticsMatch.awayTeamStatistics().goalkeeperSaves());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText.append("Passes totais | " + fixtureStatisticsMatch.homeTeamStatistics().totalPasses()
+				+ " | " + fixtureStatisticsMatch.awayTeamStatistics().totalPasses());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText.append("Passes certos | " + fixtureStatisticsMatch.homeTeamStatistics().passesAccurate()
+				+ " | " + fixtureStatisticsMatch.awayTeamStatistics().passesAccurate());
+		fixtureStatisticsText.append("\n");
+		fixtureStatisticsText.append(
+				"Porcentagem de passes certos | " + fixtureStatisticsMatch.homeTeamStatistics().passesPercentage()
+						+ " | " + fixtureStatisticsMatch.awayTeamStatistics().passesPercentage());
+		return fixtureStatisticsText.toString();
+	}
+
 }

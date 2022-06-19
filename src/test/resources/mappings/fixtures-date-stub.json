@@ -1,0 +1,18 @@
+{
+	"request": {
+		"method": "GET",
+		"urlPathPattern": "/fixtures",
+		"queryParameters": {
+			"date": {
+				"equalTo": "2022-05-12"
+			}
+		}
+	},
+	"response": {
+		"status": 200,
+		"bodyFileName": "fixtures-sample-response.json",
+		"headers": {
+			"Content-Type": "application/json"
+		}
+	}
+}

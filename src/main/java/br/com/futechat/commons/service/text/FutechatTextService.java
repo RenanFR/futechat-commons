@@ -12,5 +12,7 @@ public interface FutechatTextService {
 	String getLeagueTopScorersForTheSeason(Integer seasonYear, String leagueName);
 	
 	String getSoccerMatches(Optional<String> leagueName, Optional<String> countryName, Optional<LocalDate> schedule);
+	
+	String getFixtureStatistics(String homeTeam, String awayTeam, LocalDate matchDate);
 
 }
