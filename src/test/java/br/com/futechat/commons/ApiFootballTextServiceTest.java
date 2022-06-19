@@ -1,8 +1,12 @@
 package br.com.futechat.commons;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -66,6 +70,23 @@ public class ApiFootballTextServiceTest {
 		String leagueTopScorersForTheSeason = apiFootballTextService.getLeagueTopScorersForTheSeason(2021,
 				"Premier League");
 		assertTrue(leagueTopScorersForTheSeason.contains("Artilheiros"));
+	}
+	
+	@Test
+	public void shouldGetArsenalMostImportantFailureMatch() {
+		String matches = apiFootballTextService.getSoccerMatches(Optional.of("Premier League"), Optional.of("England"),
+				Optional.of(LocalDate.of(2022, 5, 12)));
+		assertTrue(matches.contains("Partidas encontradas"));
+		assertTrue(matches.contains("Tottenham(3)  X Arsenal(0)"));
+	}
+	
+	@Test
+	public void shouldFetchLiveEvents() {
+		String matchEventListText = apiFootballTextService.getSoccerMatches(Optional.empty(), Optional.empty(),
+				Optional.empty());
+		assertNotNull(matchEventListText);
+		assertTrue(matchEventListText.contains(
+				"Palmeiras U20(1)  X Flamengo U20(3) -> 19/06/2022 14:00 -> [33/Goal/W. de Almeida Rego | 75/Goal/Jose Welinton | 81/Goal/J. Pedro | 90/Goal]"));
 	}
 
 }

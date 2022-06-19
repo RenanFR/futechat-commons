@@ -1,5 +1,6 @@
 package br.com.futechat.commons.service.text;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.com.futechat.commons.model.Match;
 import br.com.futechat.commons.model.PlayerTransferHistory;
 import br.com.futechat.commons.service.ApiFootballService;
 import br.com.futechat.commons.service.SourceApi;
@@ -57,6 +59,32 @@ public class ApiFootballTextService implements FutechatTextService {
 				.collect(Collectors.joining("\n"));
 		finalTextLeagueTopScorers.append(goalScorerText);
 		return finalTextLeagueTopScorers.toString();
+	}
+
+	@Override
+	public String getSoccerMatches(Optional<String> leagueName, Optional<String> countryName, Optional<LocalDate> schedule) {
+		List<Match> matches = apiFootballService.getSoccerMatches(leagueName, countryName, schedule);
+		String soccerMatchesText = matches.stream().map(match -> {
+			StringBuilder soccerMatchText = new StringBuilder();
+			soccerMatchText.append(match.homeTeam() + (match.homeScore() == null ? ""
+					: "(" + match.homeScore() + ") ") + " X " + match.awayTeam() + (match.awayScore() == null ? ""
+							: "(" + match.awayScore() + ") "));
+			soccerMatchText.append("-> " + match.schedule().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+			List<String> matchInProgressStatusList = List.of("Second Half", "First Half, Kick Off", "Halftime",
+					"Second Half, 2nd Half Started", "Extra Time", "Penalty In Progress");
+			if (matchInProgressStatusList.contains(match.status())) {
+				soccerMatchText.append(" -> ");
+				String matchEventListText = match.events().stream()
+						.map(event -> event.elapsedTime() + "/" + event.type()
+								+ (event.playerName() == null ? "" : "/" + event.playerName()))
+				.collect(Collectors.joining(" | ", "[", "]"));
+				soccerMatchText.append(matchEventListText);
+			}
+			return soccerMatchText.toString();
+		}).reduce("Partidas encontradas:\n", (firstMatch, otherMatch) -> {
+			return firstMatch + "\n" + otherMatch;
+		});
+		return soccerMatchesText;
 	}
 
 }

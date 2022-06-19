@@ -10,4 +10,8 @@ public record ApiFootballFixtureRequest(Integer id, List<String> ids, ApiFootbal
 	public ApiFootballFixtureRequest(LocalDate date, Integer league) {
 		this(null, null, null, date, league, null, null, null, null, null, null, null, null, null, null);
 	}
+	
+	public ApiFootballFixtureRequest(Integer league) {
+		this(null, null, ApiFootballLive.ALL, null, league, null, null, null, null, null, null, null, null, null, null);
+	}
 }

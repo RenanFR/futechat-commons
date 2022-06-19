@@ -1,0 +1,21 @@
+{
+	"request": {
+		"method": "GET",
+		"urlPathPattern": "/leagues",
+		"queryParameters": {
+			"country": {
+				"equalTo": "England"
+			},
+			"name": {
+				"equalTo": "Premier League"
+			}
+		}
+	},
+	"response": {
+		"status": 200,
+		"bodyFileName": "premier-league-sample-response.json",
+		"headers": {
+			"Content-Type": "application/json"
+		}
+	}
+}

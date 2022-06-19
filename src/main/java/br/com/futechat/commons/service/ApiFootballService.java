@@ -1,12 +1,15 @@
 package br.com.futechat.commons.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.javatuples.Pair;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.futechat.commons.api.client.ApiFootballClient;
 import br.com.futechat.commons.api.model.ApiFootballFixtureRequest;
+import br.com.futechat.commons.api.model.ApiFootballFixturesResponse;
 import br.com.futechat.commons.api.model.ApiFootballFixturesStatus;
 import br.com.futechat.commons.api.model.ApiFootballLeague;
 import br.com.futechat.commons.api.model.ApiFootballLeagueResponse;
@@ -32,6 +36,7 @@ import br.com.futechat.commons.exception.PlayerNotFoundException;
 import br.com.futechat.commons.exception.TeamNotFoundException;
 import br.com.futechat.commons.mapper.FutechatMapper;
 import br.com.futechat.commons.model.Match;
+import br.com.futechat.commons.model.MatchEvent;
 import br.com.futechat.commons.model.PlayerTransferHistory;
 import br.com.futechat.commons.model.Transfer;
 
@@ -112,8 +117,15 @@ public class ApiFootballService implements FutechatService {
 	}
 
 	@Override
-	public List<Match> getMatchesScheduleFor(ApiFootballFixtureRequest request) {
+	public List<Match> getSoccerMatches(Optional<String> leagueName, Optional<String> countryName, Optional<LocalDate> schedule) {
 		Map<String, String> parameters = new HashMap<String, String>();
+		
+		Integer leagueId = leagueName.isPresent() ? getLeagueByNameAndCountry(leagueName.get(), countryName) : null;
+		
+		ApiFootballFixtureRequest request = schedule.isPresent()
+				? new ApiFootballFixtureRequest(schedule.get(), leagueId)
+				: new ApiFootballFixtureRequest(leagueId);
+		
 		Optional.ofNullable(request.id()).ifPresent(id -> parameters.put("id", id.toString()));
 		Optional.ofNullable(request.ids())
 				.ifPresent(ids -> parameters.put("ids", ids.stream().collect(Collectors.joining("-"))));
@@ -137,12 +149,48 @@ public class ApiFootballService implements FutechatService {
 						: status == ApiFootballFixturesStatus._2H ? "2H" : status.name()));
 		Optional.ofNullable(request.venue()).ifPresent(venue -> parameters.put("venue", venue.toString()));
 		Optional.ofNullable(request.timezone()).ifPresent(timezone -> parameters.put("timezone", timezone.toString()));
-		List<Match> matchList = apiFootballClient.fixtures(parameters).response().stream()
-				.map(fixture -> new Match(fixture.teams().home().name(), fixture.teams().away().name(),
-						fixture.goals().home(), fixture.goals().away(),
-						LocalDateTime.parse(fixture.fixture().date(), DateTimeFormatter.ISO_OFFSET_DATE_TIME)))
-				.collect(Collectors.toList());
+		List<Match> matchList = apiFootballClient.fixtures(parameters).response().stream().map(mapSoccerFixtureToMatchObject()).collect(Collectors.toList());
 		return matchList;
+	}
+
+	private Function<? super ApiFootballFixturesResponse, ? extends Match> mapSoccerFixtureToMatchObject() {
+		return fixture -> {
+			
+			List<ApiFootballFixturesStatus> noGoalMatchStatusList = List.of(ApiFootballFixturesStatus.TBD,
+					ApiFootballFixturesStatus.NS, ApiFootballFixturesStatus.SUSP, ApiFootballFixturesStatus.INT,
+					ApiFootballFixturesStatus.PST, ApiFootballFixturesStatus.CANC, ApiFootballFixturesStatus.ABD,
+					ApiFootballFixturesStatus.AWD, ApiFootballFixturesStatus.WO);
+			
+			int goalsHome = noGoalMatchStatusList.contains(fixture.fixture().status().shortStatus()) ? null : fixture.goals().home();
+			
+			int goalsAway = noGoalMatchStatusList.contains(fixture.fixture().status().shortStatus()) ? null : fixture.goals().away();
+			
+			List<MatchEvent> events = new ArrayList<>();
+			
+			if (fixture.events() != null) {
+				events.addAll(fixture.events().stream()
+						.map(event -> new MatchEvent(event.time().elapsed(), event.type(), event.player().name()))
+						.collect(Collectors.toList()));
+			}
+			
+			Match match = new Match(fixture.teams().home().name(), fixture.teams().away().name(), goalsHome,
+					goalsAway,
+					LocalDateTime.parse(fixture.fixture().date(), DateTimeFormatter.ISO_OFFSET_DATE_TIME), fixture.fixture().status().longStatus(), events);
+			return match;
+		};
+	}
+
+	private int getLeagueByNameAndCountry(String leagueName, Optional<String> countryName) {
+		Map<String, String> leagueQueryParameters = new HashMap<String, String>();
+		
+		leagueQueryParameters.put("name", leagueName);
+		
+		countryName.ifPresent(country -> leagueQueryParameters.put("country", country));
+		
+		int leagueId = apiFootballClient.leagues(leagueQueryParameters).response().stream()
+				.map(ApiFootballLeagueResponse::league).mapToInt(ApiFootballLeague::id).findFirst()
+				.orElseThrow(() -> new LeagueNotFoundException(leagueName));
+		return leagueId;
 	}
 
 }

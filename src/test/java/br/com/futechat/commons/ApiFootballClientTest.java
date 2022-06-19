@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.time.LocalDate;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,6 @@ import br.com.futechat.commons.api.model.ApiFootballFixturesResponse;
 import br.com.futechat.commons.api.model.ApiFootballLeagueResponse;
 import br.com.futechat.commons.api.model.ApiFootballPlayersResponse;
 import br.com.futechat.commons.api.model.ApiFootballResponse;
-import br.com.futechat.commons.api.model.ApiFootballSeason;
 import br.com.futechat.commons.api.model.ApiFootballTeamsResponse;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -31,7 +29,6 @@ public class ApiFootballClientTest {
 	private ApiFootballClient apiFootballClient;
 
 	@Test
-	@Ignore
 	public void shouldFetchSeasonsFromApi() {
 
 		ApiFootballResponse<Integer> seasons = apiFootballClient.seasons();
@@ -41,23 +38,16 @@ public class ApiFootballClientTest {
 	}
 
 	@Test
-	@Ignore
 	public void shouldFetchLeagueInformationFromApi() {
 		ApiFootballResponse<ApiFootballLeagueResponse> leagues = apiFootballClient
 				.leagues(Map.of("name", "Premier League"));
 		assertEquals("leagues", leagues.get());
 		ApiFootballLeagueResponse premierLeague = leagues.response().get(0);
 		assertNotNull(premierLeague);
-		ApiFootballSeason premierLeagueCurrentSeason = premierLeague.seasons().stream()
-				.filter(leagueSeason -> leagueSeason.current()).findFirst().get();
-		assertNotNull(premierLeagueCurrentSeason);
-		boolean isCurrentSeasonReally = premierLeagueCurrentSeason.end().isEqual(LocalDate.of(2022, 5, 22));
-		assertTrue(isCurrentSeasonReally);
 		assertEquals("England", premierLeague.country().name());
 	}
 
 	@Test
-	@Ignore
 	public void shouldFetchTeamsInformationFromApi() {
 		ApiFootballResponse<ApiFootballTeamsResponse> teams = apiFootballClient.teams(Map.of("name", "Arsenal"));
 		assertEquals("teams", teams.get());
@@ -65,7 +55,6 @@ public class ApiFootballClientTest {
 	}
 	
 	@Test
-	@Ignore
 	public void shouldFetchAdultoNey() {
 		ApiFootballResponse<ApiFootballPlayersResponse> players = apiFootballClient.players(Map.of("search", "Neymar", "team", "85"));
 		assertEquals("players", players.get());
@@ -73,7 +62,6 @@ public class ApiFootballClientTest {
 	}
 	
 	@Test
-	@Ignore
 	public void shouldGetTopScorers() {
 		ApiFootballResponse<ApiFootballPlayersResponse> topScorers = apiFootballClient
 				.topScorers(Map.of("league", "39", "season", "2021"));

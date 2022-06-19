@@ -1,11 +1,11 @@
 package br.com.futechat.commons.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import org.javatuples.Pair;
 
-import br.com.futechat.commons.api.model.ApiFootballFixtureRequest;
 import br.com.futechat.commons.model.Match;
 import br.com.futechat.commons.model.PlayerTransferHistory;
 
@@ -17,6 +17,6 @@ public interface FutechatService {
 	
 	List<Pair<String, Integer>> getLeagueTopScorersForTheSeason(Integer seasonYear, String leagueName);
 	
-	List<Match> getMatchesScheduleFor(ApiFootballFixtureRequest request);
+	List<Match> getSoccerMatches(Optional<String> leagueName, Optional<String> countryName, Optional<LocalDate> schedule);
 
 }
