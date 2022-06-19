@@ -161,9 +161,9 @@ public class ApiFootballService implements FutechatService {
 					ApiFootballFixturesStatus.PST, ApiFootballFixturesStatus.CANC, ApiFootballFixturesStatus.ABD,
 					ApiFootballFixturesStatus.AWD, ApiFootballFixturesStatus.WO);
 			
-			int goalsHome = noGoalMatchStatusList.contains(fixture.fixture().status().shortStatus()) ? null : fixture.goals().home();
+			Integer goalsHome = noGoalMatchStatusList.contains(fixture.fixture().status().shortStatus()) ? null : fixture.goals().home();
 			
-			int goalsAway = noGoalMatchStatusList.contains(fixture.fixture().status().shortStatus()) ? null : fixture.goals().away();
+			Integer goalsAway = noGoalMatchStatusList.contains(fixture.fixture().status().shortStatus()) ? null : fixture.goals().away();
 			
 			List<MatchEvent> events = new ArrayList<>();
 			
@@ -173,9 +173,9 @@ public class ApiFootballService implements FutechatService {
 						.collect(Collectors.toList()));
 			}
 			
-			Match match = new Match(fixture.teams().home().name(), fixture.teams().away().name(), goalsHome,
-					goalsAway,
-					LocalDateTime.parse(fixture.fixture().date(), DateTimeFormatter.ISO_OFFSET_DATE_TIME), fixture.fixture().status().longStatus(), events);
+			Match match = new Match(fixture.teams().home().name(), fixture.teams().away().name(), goalsHome, goalsAway,
+					LocalDateTime.parse(fixture.fixture().date(), DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+					fixture.fixture().status().longStatus(), events, fixture.fixture().referee());
 			return match;
 		};
 	}

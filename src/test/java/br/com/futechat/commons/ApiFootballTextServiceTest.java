@@ -77,7 +77,7 @@ public class ApiFootballTextServiceTest {
 		String matches = apiFootballTextService.getSoccerMatches(Optional.of("Premier League"), Optional.of("England"),
 				Optional.of(LocalDate.of(2022, 5, 12)));
 		assertTrue(matches.contains("Partidas encontradas"));
-		assertTrue(matches.contains("Tottenham(3)  X Arsenal(0)"));
+		assertTrue(matches.contains("Tottenham(3) X Arsenal(0)"));
 	}
 	
 	@Test
@@ -86,7 +86,15 @@ public class ApiFootballTextServiceTest {
 				Optional.empty());
 		assertNotNull(matchEventListText);
 		assertTrue(matchEventListText.contains(
-				"Palmeiras U20(1)  X Flamengo U20(3) -> 19/06/2022 14:00 -> [33/Goal/W. de Almeida Rego | 75/Goal/Jose Welinton | 81/Goal/J. Pedro | 90/Goal]"));
+				"Palmeiras U20(1) X Flamengo U20(3) -> 19/06/2022 14:00 -> [33/Goal/W. de Almeida Rego | 75/Goal/Jose Welinton | 81/Goal/J. Pedro | 90/Goal]"));
+	}
+	
+	@Test
+	public void shouldFindFutureSoccerFixtures() {
+		String soccerMatchesForTomorrow = apiFootballTextService.getSoccerMatches(Optional.empty(), Optional.empty(),
+				Optional.of(LocalDate.of(2022, 6, 20)));
+		assertNotNull(soccerMatchesForTomorrow);
+		assertTrue(soccerMatchesForTomorrow.contains("Sao Paulo X Palmeiras -> 20/06/2022 23:00"));
 	}
 
 }

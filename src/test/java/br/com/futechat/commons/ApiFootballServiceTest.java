@@ -81,4 +81,12 @@ public class ApiFootballServiceTest {
 		assertTrue(!u20Fixture.events().isEmpty());
 	}
 	
+	@Test
+	public void shouldFindFutureSoccerFixtures() {
+		List<Match> tomorrowFixtures = futechatService.getSoccerMatches(Optional.empty(), Optional.empty(), Optional.of(LocalDate.of(2022, 6, 20)));
+		Match choqueRei = tomorrowFixtures.stream().filter(soccerFixture -> soccerFixture.homeTeam().equals("Sao Paulo")
+				&& soccerFixture.awayTeam().equals("Palmeiras")).findFirst().get();
+		assertEquals("Anderson Daronco", choqueRei.referee());
+	}
+	
 }

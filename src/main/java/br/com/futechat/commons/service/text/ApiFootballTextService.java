@@ -66,8 +66,8 @@ public class ApiFootballTextService implements FutechatTextService {
 		List<Match> matches = apiFootballService.getSoccerMatches(leagueName, countryName, schedule);
 		String soccerMatchesText = matches.stream().map(match -> {
 			StringBuilder soccerMatchText = new StringBuilder();
-			soccerMatchText.append(match.homeTeam() + (match.homeScore() == null ? ""
-					: "(" + match.homeScore() + ") ") + " X " + match.awayTeam() + (match.awayScore() == null ? ""
+			soccerMatchText.append(match.homeTeam() + (match.homeScore() == null ? " "
+					: "(" + match.homeScore() + ") ") + "X " + match.awayTeam() + (match.awayScore() == null ? " "
 							: "(" + match.awayScore() + ") "));
 			soccerMatchText.append("-> " + match.schedule().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
 			List<String> matchInProgressStatusList = List.of("Second Half", "First Half, Kick Off", "Halftime",
