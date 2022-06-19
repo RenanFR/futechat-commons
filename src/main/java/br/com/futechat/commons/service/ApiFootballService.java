@@ -38,6 +38,8 @@ import br.com.futechat.commons.model.Transfer;
 @Service
 public class ApiFootballService implements FutechatService {
 
+	private static final String PATTERN = "yyyy-MM-dd";
+
 	private static final String PLAYER_TEAM_PARAM = "team";
 
 	private static final String PLAYER_PARAM = "player";
@@ -119,16 +121,16 @@ public class ApiFootballService implements FutechatService {
 				.ifPresent(live -> parameters.put("live", live == ApiFootballLive.ALL ? ApiFootballLive.ALL.getValue()
 						: request.ids().stream().collect(Collectors.joining("-"))));
 		Optional.ofNullable(request.date())
-				.ifPresent(date -> parameters.put("date", date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
-		Optional.ofNullable(request.league()).ifPresent(league -> parameters.put("league", league.toString()));
-		Optional.ofNullable(request.season()).ifPresent(season -> parameters.put("season", season.toString()));
-		Optional.ofNullable(request.season()).ifPresent(team -> parameters.put("team", team.toString()));
+				.ifPresent(date -> parameters.put("date", date.format(DateTimeFormatter.ofPattern(PATTERN))));
+		Optional.ofNullable(request.league()).ifPresent(league -> parameters.put(LEAGUE_PARAM, league.toString()));
+		Optional.ofNullable(request.season()).ifPresent(season -> parameters.put(SEASON_PARAM, season.toString()));
+		Optional.ofNullable(request.season()).ifPresent(team -> parameters.put(PLAYER_TEAM_PARAM, team.toString()));
 		Optional.ofNullable(request.last()).ifPresent(last -> parameters.put("last", last.toString()));
 		Optional.ofNullable(request.next()).ifPresent(next -> parameters.put("next", next.toString()));
 		Optional.ofNullable(request.from())
-				.ifPresent(from -> parameters.put("from", from.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
+				.ifPresent(from -> parameters.put("from", from.format(DateTimeFormatter.ofPattern(PATTERN))));
 		Optional.ofNullable(request.to())
-				.ifPresent(to -> parameters.put("to", to.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
+				.ifPresent(to -> parameters.put("to", to.format(DateTimeFormatter.ofPattern(PATTERN))));
 		Optional.ofNullable(request.round()).ifPresent(round -> parameters.put("round", round.toString()));
 		Optional.ofNullable(request.status())
 				.ifPresent(status -> parameters.put("status", status == ApiFootballFixturesStatus._1H ? "1H"
