@@ -192,7 +192,7 @@
 				<artifactId>maven-release-plugin</artifactId>
 				<configuration>
 					<autoVersionSubmodules>true</autoVersionSubmodules>
-					<tagNameFormat>v@{parsedVersion.majorVersion}.0.0</tagNameFormat>
+					<tagNameFormat>v@{project.version}</tagNameFormat>
 					<useReleaseProfile>false</useReleaseProfile>
 					<developmentVersion>${parsedVersion.nextIncrementalVersion}.0.0-SNAPSHOT</developmentVersion>
 					<checkModificationExcludes>
