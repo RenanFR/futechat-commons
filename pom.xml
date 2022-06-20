@@ -173,7 +173,7 @@
 				<executions>
 					<execution>
 						<id>parse-versions-for-release</id>
-						<phase>validate</phase>
+						<phase>initialize</phase>
 						<goals>
 							<goal>parse-version</goal>
 						</goals>
