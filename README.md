@@ -13,7 +13,7 @@ cp ./settings.xml /var/lib/jenkins/.m2/settings.xml
 ```
 - Executa os testes do projeto por meio do comando maven
 ```sh
-mvn -s settings.xml test
+mvn test
 ```
 - Remove o Snapshot da versão em desenvolvimento para preparar a publicação da iteração atual da biblioteca
 ```sh
