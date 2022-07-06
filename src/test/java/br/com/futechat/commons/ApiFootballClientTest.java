@@ -67,7 +67,7 @@ public class ApiFootballClientTest {
 		ApiFootballResponse<ApiFootballPlayersResponse> topScorers = apiFootballClient
 				.topScorers(Map.of("league", "39", "season", "2021"));
 		assertEquals("players/topscorers", topScorers.get());
-		assertEquals("Heung-Min Son", topScorers.response().get(0).player().name());
+		assertEquals("Son Heung-Min", topScorers.response().get(0).player().name());
 		assertEquals(23, topScorers.response().get(0).statistics().get(0).goals().total());
 	}
 	
