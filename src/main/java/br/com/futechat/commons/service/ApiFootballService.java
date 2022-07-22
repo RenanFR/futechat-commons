@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import br.com.futechat.commons.exception.FixtureNotFoundException;
 import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -137,7 +138,10 @@ public class ApiFootballService implements FutechatService {
 				.ifPresent(live -> parameters.put("live", live == ApiFootballLive.ALL ? ApiFootballLive.ALL.getValue()
 						: request.ids().stream().collect(Collectors.joining("-"))));
 		Optional.ofNullable(request.date())
-				.ifPresent(date -> parameters.put("date", date.format(DateTimeFormatter.ofPattern(PATTERN))));
+				.ifPresent(date -> {
+					parameters.put("date", date.format(DateTimeFormatter.ofPattern(PATTERN)));
+					parameters.put(SEASON_PARAM, String.valueOf(date.getYear()));
+				});
 		Optional.ofNullable(request.league()).ifPresent(league -> parameters.put(LEAGUE_PARAM, league.toString()));
 		Optional.ofNullable(request.season()).ifPresent(season -> parameters.put(SEASON_PARAM, season.toString()));
 		Optional.ofNullable(request.season()).ifPresent(team -> parameters.put(PLAYER_TEAM_PARAM, team.toString()));
@@ -203,7 +207,7 @@ public class ApiFootballService implements FutechatService {
 				.fixtures(Map.of("date", matchDate.format(DateTimeFormatter.ofPattern(PATTERN))));
 		ApiFootballFixturesResponse soccerMatchFound = matchesOnThatDay.response().stream().filter(
 				match -> match.teams().home().name().equals(homeTeam) && match.teams().away().name().equals(awayTeam))
-				.findAny().get();
+				.findAny().orElseThrow(() -> new FixtureNotFoundException(homeTeam, awayTeam, matchDate));
 		Integer fixtureId = soccerMatchFound.fixture().id();
 		List<ApiFootballStatisticsResponse> statisticsResponses = apiFootballClient
 				.fixturesStatistics(Map.of("fixture", fixtureId.toString())).response();
