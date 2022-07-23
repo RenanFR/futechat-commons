@@ -1,5 +1,4 @@
 package br.com.futechat.commons.model;
 
-public record Player(String name) {
-
+public record Player(int id, int apiFootballId, String name, String height, Team team) {
 }

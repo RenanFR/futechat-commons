@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Import(FutechatCommonsConfig.class)
+@Import({ FutechatCommonsConfig.class, DatabaseConfig.class })
 public @interface EnableFutechatCommons {
 
 }

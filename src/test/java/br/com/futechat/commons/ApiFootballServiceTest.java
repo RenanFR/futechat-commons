@@ -23,7 +23,7 @@ import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemp
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
 import br.com.futechat.commons.api.client.config.FeignConfig;
-import br.com.futechat.commons.mapper.FutechatMapperImpl;
+import br.com.futechat.commons.mapper.FutechatMapper;
 import br.com.futechat.commons.model.Match;
 import br.com.futechat.commons.service.ApiFootballService;
 import br.com.futechat.commons.service.FutechatService;
@@ -31,7 +31,7 @@ import br.com.futechat.commons.service.FutechatService;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ActiveProfiles("test")
 @SpringBootTest(classes = { ApiFootballService.class, FeignConfig.class,
-		FutechatMapperImpl.class })
+		FutechatMapper.class })
 public class ApiFootballServiceTest {
 
 	@Rule

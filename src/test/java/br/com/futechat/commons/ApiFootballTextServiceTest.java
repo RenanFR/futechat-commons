@@ -23,14 +23,14 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import br.com.futechat.commons.api.client.config.FeignConfig;
 import br.com.futechat.commons.aspect.ApiFootballAspect;
 import br.com.futechat.commons.aspect.AspectJConfig;
-import br.com.futechat.commons.mapper.FutechatMapperImpl;
+import br.com.futechat.commons.mapper.FutechatMapper;
 import br.com.futechat.commons.service.ApiFootballService;
 import br.com.futechat.commons.service.text.ApiFootballTextService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ActiveProfiles("test")
 @SpringBootTest(classes = { ApiFootballService.class, ApiFootballTextService.class, FeignConfig.class,
-		ApiFootballAspect.class, AspectJConfig.class, FutechatMapperImpl.class })
+		ApiFootballAspect.class, AspectJConfig.class, FutechatMapper.class })
 public class ApiFootballTextServiceTest {
 
 	@Rule

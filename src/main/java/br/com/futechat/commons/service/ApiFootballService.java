@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import br.com.futechat.commons.exception.FixtureNotFoundException;
 import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +34,7 @@ import br.com.futechat.commons.api.model.ApiFootballStatisticsType;
 import br.com.futechat.commons.api.model.ApiFootballTeam;
 import br.com.futechat.commons.api.model.ApiFootballTeamsResponse;
 import br.com.futechat.commons.api.model.ApiFootballTransfersResponse;
+import br.com.futechat.commons.exception.FixtureNotFoundException;
 import br.com.futechat.commons.exception.LeagueNotFoundException;
 import br.com.futechat.commons.exception.PlayerNotFoundException;
 import br.com.futechat.commons.exception.TeamNotFoundException;
@@ -42,11 +42,12 @@ import br.com.futechat.commons.mapper.FutechatMapper;
 import br.com.futechat.commons.model.Match;
 import br.com.futechat.commons.model.MatchEvent;
 import br.com.futechat.commons.model.MatchStatistics;
+import br.com.futechat.commons.model.Player;
 import br.com.futechat.commons.model.PlayerTransferHistory;
 import br.com.futechat.commons.model.Transfer;
 
 @Service
-public class ApiFootballService implements FutechatService {
+public class ApiFootballService extends FutechatService {
 
 	private static final String PATTERN = "yyyy-MM-dd";
 
@@ -73,13 +74,14 @@ public class ApiFootballService implements FutechatService {
 	}
 
 	@Override
-	public String getPlayerHeight(String playerName, String teamName, Optional<String> countryName) {
+	public Player getPlayer(String playerName, String teamName, Optional<String> countryName) {
 		ApiFootballResponse<ApiFootballTeamsResponse> teams = apiFootballClient.teams(Map.of(NAME_PARAM, teamName));
-		ApiFootballTeam team = teams.response().stream().map(ApiFootballTeamsResponse::team).findFirst()
+		ApiFootballTeam apiFootballTeam = teams.response().stream().map(ApiFootballTeamsResponse::team).findFirst()
 				.orElseThrow(() -> new TeamNotFoundException(teamName));
-		Integer teamId = team.id();
-		ApiFootballPlayer player = getPlayerByNameAndTeamId(playerName, teamId);
-		return player.height();
+		Integer teamId = apiFootballTeam.id();
+		ApiFootballPlayer apiFootballPlayer = getPlayerByNameAndTeamId(playerName, teamId);
+		Player player = mapper.fromApiFootballPlayerAndTeamToPlayer(apiFootballPlayer, apiFootballTeam);
+		return player;
 	}
 
 	private ApiFootballPlayer getPlayerByNameAndTeamId(String playerName, Integer teamId) {
