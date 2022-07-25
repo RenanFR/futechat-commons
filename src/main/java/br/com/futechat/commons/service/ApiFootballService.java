@@ -260,8 +260,7 @@ public class ApiFootballService extends FutechatService {
 		leagueQueryParameters.put("season", String.valueOf(LocalDate.now().getYear()));
 		
 		List<League> currentSeasonLeagues = apiFootballClient.leagues(leagueQueryParameters).response().stream()
-				.map(ApiFootballLeagueResponse::league)
-				.map(mapper::fromApiFootballLeagueToLeague)
+				.map(leagueResponse -> mapper.fromApiFootballLeagueResponseToLeague(leagueResponse))
 				.collect(Collectors.toList());
 		return currentSeasonLeagues;
 

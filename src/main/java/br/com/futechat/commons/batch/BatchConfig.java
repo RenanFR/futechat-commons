@@ -1,15 +1,14 @@
 package br.com.futechat.commons.batch;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
-import org.springframework.batch.core.configuration.annotation.DefaultBatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
-import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,15 +25,21 @@ import org.springframework.transaction.PlatformTransactionManager;
 @EnableScheduling
 public class BatchConfig {
 
-	@Value("classpath:/org/springframework/batch/core/schema-drop-h2.sql")
+	@Value("classpath:/org/springframework/batch/core/schema-drop-postgresql.sql")
 	private Resource schemaDropH2Sql;
 
-	@Value("classpath:/org/springframework/batch/core/schema-h2.sql")
+	@Value("classpath:/org/springframework/batch/core/schema-postgresql.sql")
 	private Resource schemaH2Sql;
 
 	@Autowired
-	@Qualifier("h2DataSource")
+	@Qualifier("rdsDataSource")
 	private DataSource dataSource;
+	
+	@Autowired
+	private PlatformTransactionManager transactionManager;
+	
+	@Autowired
+	private EntityManagerFactory entityManagerFactory;
 
 	@Bean
 	public DataSourceInitializer dataSourceInitializer() {
@@ -51,13 +56,9 @@ public class BatchConfig {
 	private JobRepository jobRepository() throws Exception {
 		JobRepositoryFactoryBean jobRepositoryFactoryBean = new JobRepositoryFactoryBean();
 		jobRepositoryFactoryBean.setDataSource(dataSource);
-		jobRepositoryFactoryBean.setTransactionManager(transactionManager());
+		jobRepositoryFactoryBean.setTransactionManager(transactionManager);
 		jobRepositoryFactoryBean.afterPropertiesSet();
 		return (JobRepository) jobRepositoryFactoryBean.getObject();
-	}
-
-	private PlatformTransactionManager transactionManager() {
-		return new ResourcelessTransactionManager();
 	}
 
 	public JobLauncher jobLauncher() throws Exception {
@@ -69,7 +70,7 @@ public class BatchConfig {
 
 	@Bean
 	public BatchConfigurer batchConfigurer() {
-		return new DefaultBatchConfigurer(dataSource);
+		return new FutechatBatchConfigurer(entityManagerFactory);
 	}
 
 }

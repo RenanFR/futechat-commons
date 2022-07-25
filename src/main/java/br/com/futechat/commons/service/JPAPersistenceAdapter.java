@@ -34,7 +34,7 @@ public class JPAPersistenceAdapter extends PersistenceAdapter {
 	@Override
 	public PlayerEntity savePlayerAndTeam(Player player) {
 		PlayerEntity playerEntity = mapper.fromPlayerToPlayerEntity(player);
-		playerEntity.setTeam(teamRepository.findByNameAndCountry(player.team().name(), player.team().country())
+		playerEntity.setTeam(teamRepository.findByNameAndCountry(player.team().getName(), player.team().getCountry())
 				.orElse(teamRepository.saveAndFlush(playerEntity.getTeam())));
 		return playerRepository.save(playerEntity);
 	}
@@ -48,7 +48,7 @@ public class JPAPersistenceAdapter extends PersistenceAdapter {
 	@Override
 	public void savePlayerTransfers(PlayerTransferHistory playerTransferHistory) {
 		List<PlayerEntity> existingPlayer = playerRepository.findByNameAndTeamName(
-				playerTransferHistory.player().name(), playerTransferHistory.player().team().name());
+				playerTransferHistory.player().name(), playerTransferHistory.player().team().getName());
 		existingPlayer.stream().findFirst().ifPresentOrElse(player -> {
 			convertAndSaveTransfers(playerTransferHistory, player);
 		}, () -> {

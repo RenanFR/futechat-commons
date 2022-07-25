@@ -1,41 +1,55 @@
 package br.com.futechat.commons.batch;
 
-import java.util.List;
-
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.resource.StepExecutionSimpleCompletionPolicy;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import br.com.futechat.commons.model.League;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class LeaguesDatabaseUpdateJob {
-	
+
 	@Autowired
 	private JobBuilderFactory jobBuilderFactory;
-	
+
 	@Autowired
 	private StepBuilderFactory stepBuilderFactory;
+
+	@Autowired
+	private ApiFootballLeagueReader reader;
+
+	@Autowired
+	private ApiFootballLeagueProcessor processor;
+
+	@Autowired
+	private ApiFootballLeagueWriter writer;
 	
-	@Bean(name = "singleLeagueStep")
-	public Step singleLeagueStep(ItemReader<List<League>> reader, ItemProcessor<List<League>, List<League>> processor,
-			ItemWriter<List<League>> writer) {
-		return stepBuilderFactory.get("singleLeagueStep").<List<League>, List<League>>chunk(new StepExecutionSimpleCompletionPolicy()).reader(reader)
-				.processor(processor).writer(writer).build();
+	@Autowired
+	private PlatformTransactionManager transactionManager;
+
+	@Bean
+	protected Step fetchLeaguesFromApi() {
+		return stepBuilderFactory.get("fetchLeaguesFromApi").tasklet(reader).build();
 	}
-	
+
+	@Bean
+	protected Step filterExistingDatabaseLeagues() {
+		return stepBuilderFactory.get("filterExistingDatabaseLeagues").tasklet(processor).build();
+	}
+
+	@Bean
+	protected Step saveRemainingLeaguesToDatabase() {
+		return stepBuilderFactory.get("saveRemainingLeaguesToDatabase").tasklet(writer)
+				.transactionManager(transactionManager).build();
+	}
+
 	@Bean(name = "leagueDatabaseUpdateJob")
-	public Job leagueDatabaseUpdateJob(@Qualifier("singleLeagueStep") Step step) {
-		return jobBuilderFactory.get("leagueDatabaseUpdateJob").start(step).build();
+	public Job leagueDatabaseUpdateJob() {
+		return jobBuilderFactory.get("leagueDatabaseUpdateJob").start(fetchLeaguesFromApi())
+				.next(filterExistingDatabaseLeagues()).next(saveRemainingLeaguesToDatabase()).build();
 	}
-	
+
 }

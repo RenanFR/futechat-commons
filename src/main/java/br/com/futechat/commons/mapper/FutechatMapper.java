@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import br.com.futechat.commons.api.model.ApiFootballLeague;
+import br.com.futechat.commons.api.model.ApiFootballLeagueResponse;
 import br.com.futechat.commons.api.model.ApiFootballPlayer;
 import br.com.futechat.commons.api.model.ApiFootballResponse;
 import br.com.futechat.commons.api.model.ApiFootballTeam;
@@ -53,10 +54,6 @@ public abstract class FutechatMapper {
 	
 	public abstract PlayerEntity fromPlayerToPlayerEntity(Player player);
 	
-	public abstract League fromApiFootballLeagueToLeague(ApiFootballLeague apiFootballLeague);
-	
-	public abstract LeagueEntity fromLeagueToLeagueEntity(League league);
-	
 	@Mapping(source = "apiFootballId", target = "player.id")
 	@Mapping(source = "name", target = "player.name")
 	@Mapping(source = "height", target = "player.height")
@@ -88,10 +85,24 @@ public abstract class FutechatMapper {
 	
 	public abstract List<Player> fromPlayerEntityToPlayerList(List<PlayerEntity> entities);
 	
+	@Mapping(target = "id", ignore = true)
+	@Mapping(source = "id", target = "apiFootballId")
+	public abstract League fromApiFootballLeagueToLeague(ApiFootballLeague apiFootballLeague);
+	
+	@Mapping(target = "id", ignore = true)
+	@Mapping(source = "league.id", target = "apiFootballId")
+	@Mapping(source = "country.name", target = "country")
+	@Mapping(source = "league.name", target = "name")
+	@Mapping(source = "league.type", target = "type")
+	@Mapping(source = "league.logo", target = "logo")
+	public abstract League fromApiFootballLeagueResponseToLeague(ApiFootballLeagueResponse apiFootballLeagueResponse);
+	
+	@Mapping(target = "id", ignore = true)
+	public abstract LeagueEntity fromLeagueToLeagueEntity(League league);
+	
 	public abstract List<LeagueEntity> fromLeagueToLeagueEntityList(List<League> leagueList);
 	
 	public abstract League fromLeagueEntityToLeague(LeagueEntity leagueEntity);
 	
 	public abstract List<League> fromLeagueEntityToLeagueList(List<LeagueEntity> leagueEntity);
-
 }
