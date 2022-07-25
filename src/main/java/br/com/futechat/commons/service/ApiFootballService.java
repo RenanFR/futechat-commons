@@ -39,6 +39,7 @@ import br.com.futechat.commons.exception.LeagueNotFoundException;
 import br.com.futechat.commons.exception.PlayerNotFoundException;
 import br.com.futechat.commons.exception.TeamNotFoundException;
 import br.com.futechat.commons.mapper.FutechatMapper;
+import br.com.futechat.commons.model.League;
 import br.com.futechat.commons.model.Match;
 import br.com.futechat.commons.model.MatchEvent;
 import br.com.futechat.commons.model.MatchStatistics;
@@ -91,9 +92,10 @@ public class ApiFootballService extends FutechatService {
 	}
 
 	@Override
-	public PlayerTransferHistory getPlayerTransferHistory(String playerName, String teamName) {
-		int teamId = apiFootballClient.teams(Map.of(NAME_PARAM, teamName)).response().stream()
-				.map(ApiFootballTeamsResponse::team).findAny().orElseThrow(() -> new TeamNotFoundException(teamName))
+	public PlayerTransferHistory getPlayerTransfers(String playerName, String teamName) {
+		ApiFootballTeam team = apiFootballClient.teams(Map.of(NAME_PARAM, teamName)).response().stream()
+				.map(ApiFootballTeamsResponse::team).findAny().orElseThrow(() -> new TeamNotFoundException(teamName));
+		int teamId = team
 				.id();
 		ApiFootballPlayer player = getPlayerByNameAndTeamId(playerName, teamId);
 		ApiFootballResponse<ApiFootballTransfersResponse> transfers = apiFootballClient
@@ -101,7 +103,7 @@ public class ApiFootballService extends FutechatService {
 		PlayerTransferHistory playerTransferHistory = mapper
 				.fromApiFootballTransfersResponseToPlayerTransferHistory(transfers);
 		playerTransferHistory.transfers().sort(Comparator.comparing(Transfer::date));
-		return playerTransferHistory;
+		return new PlayerTransferHistory(mapper.fromApiFootballPlayerAndTeamToPlayer(player, team), playerTransferHistory.transfers());
 
 	}
 
@@ -251,6 +253,18 @@ public class ApiFootballService extends FutechatService {
 				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.TOTAL_PASSES.getRawValue())), 
 				Integer.valueOf(statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.PASSES_ACCURATE.getRawValue())), 
 				statisticsMapOfHomeTeam.get(ApiFootballStatisticsType.PASSES.getRawValue()));
+	}
+	
+	public List<League> getLeagues() {
+		Map<String, String> leagueQueryParameters = new HashMap<String, String>();
+		leagueQueryParameters.put("season", String.valueOf(LocalDate.now().getYear()));
+		
+		List<League> currentSeasonLeagues = apiFootballClient.leagues(leagueQueryParameters).response().stream()
+				.map(ApiFootballLeagueResponse::league)
+				.map(mapper::fromApiFootballLeagueToLeague)
+				.collect(Collectors.toList());
+		return currentSeasonLeagues;
+
 	}
 
 }

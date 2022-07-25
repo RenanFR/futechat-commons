@@ -4,15 +4,21 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import org.javatuples.Pair;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -23,15 +29,24 @@ import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemp
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
 import br.com.futechat.commons.api.client.config.FeignConfig;
+import br.com.futechat.commons.entity.PlayerEntity;
+import br.com.futechat.commons.entity.TeamEntity;
 import br.com.futechat.commons.mapper.FutechatMapper;
+import br.com.futechat.commons.mapper.FutechatMapperImpl;
 import br.com.futechat.commons.model.Match;
+import br.com.futechat.commons.repository.PlayerRepository;
+import br.com.futechat.commons.repository.TeamRepository;
+import br.com.futechat.commons.repository.TransferRepository;
 import br.com.futechat.commons.service.ApiFootballService;
 import br.com.futechat.commons.service.FutechatService;
+import br.com.futechat.commons.service.JPAPersistenceAdapter;
+import br.com.futechat.commons.service.PersistenceAdapter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ActiveProfiles("test")
-@SpringBootTest(classes = { ApiFootballService.class, FeignConfig.class,
-		FutechatMapper.class })
+@SpringBootTest(classes = { ApiFootballService.class, FeignConfig.class, FutechatMapperImpl.class,
+		JPAPersistenceAdapter.class, H2Config.class, PlayerRepository.class, TeamRepository.class,
+		TransferRepository.class })
 public class ApiFootballServiceTest {
 
 	@Rule
@@ -40,16 +55,41 @@ public class ApiFootballServiceTest {
 
 	@Autowired
 	private FutechatService futechatService;
-
+	
+	@Mock
+	private PlayerRepository playerRepository;
+	
+	@Mock
+	private TeamRepository teamRepository;
+	
+	@Mock
+	private TransferRepository transferRepository;
+	
+	@Autowired
+	private FutechatMapper mapper;
+	
+	private PersistenceAdapter persistenceAdapter;
+	
+	@Before
+	public void setup() {
+		persistenceAdapter = new JPAPersistenceAdapter(playerRepository, teamRepository, transferRepository, mapper);
+		futechatService.setPersistenceAdapter(persistenceAdapter);
+	}
+	
 	@Test
 	public void shouldFetchNeyzinhoHeight() {
 		assertEquals("175 cm", futechatService.getPlayerHeight("Neymar", "Paris Saint Germain", Optional.empty()));
+		verify(playerRepository, times(1)).save(any(PlayerEntity.class));
+		verify(teamRepository, times(1)).save(any(TeamEntity.class));
 	}
 
 	@Test
 	public void shouldGetNeymarTransferHistory() {
 		assertEquals("Santos", futechatService.getPlayerTransferHistory("Neymar", "Paris Saint Germain")
 				.transfers().get(0).teamOut());
+		verify(teamRepository, times(1)).save(any(TeamEntity.class));
+		verify(playerRepository, times(1)).save(any(PlayerEntity.class));
+		verify(transferRepository, times(1)).saveAll(ArgumentMatchers.anyList());
 	}
 	
 	@Test

@@ -4,7 +4,7 @@ spring:
     
 aws:
   paramstore:
-    defaultContext: application
+    defaultContext: agama
     prefix: /config
     profileSeparator: _
     enabled: true

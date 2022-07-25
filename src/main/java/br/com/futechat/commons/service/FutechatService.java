@@ -16,7 +16,7 @@ public abstract class FutechatService {
 	private PersistenceAdapter persistenceAdapter;
 	
 	public String getPlayerHeight(String playerName, String teamName, Optional<String> countryName) {
-		Optional<Player> optionalPlayer = persistenceAdapter.getPlayerFromTeam(playerName, teamName, countryName)
+		Optional<Player> optionalPlayer = persistenceAdapter.getPlayerFromTeam(playerName, teamName)
 				.stream().findFirst();
 
 		Player player = optionalPlayer.orElse(getPlayer(playerName, teamName, countryName));
@@ -26,9 +26,31 @@ public abstract class FutechatService {
 		return player.height();
 	}
 
+	public PlayerTransferHistory getPlayerTransferHistory(String playerName, String teamName) {
+		
+		Optional<PlayerTransferHistory> optionalPlayerTransferHistory = persistenceAdapter.getPlayerWithTransferHistory(playerName, teamName);
+		
+		if (!optionalPlayerTransferHistory.isPresent()) {
+			return fetchAndSavePlayerWithTransfers(playerName, teamName);
+		} else {
+			if (!optionalPlayerTransferHistory.get().transfers().isEmpty()) {
+				return optionalPlayerTransferHistory.get();
+			} else {
+				return fetchAndSavePlayerWithTransfers(playerName, teamName);
+			}
+		}
+		
+	}
+
+	private PlayerTransferHistory fetchAndSavePlayerWithTransfers(String playerName, String teamName) {
+		PlayerTransferHistory playerTransferHistory = getPlayerTransfers(playerName, teamName);
+		persistenceAdapter.savePlayerTransfers(playerTransferHistory);
+		return playerTransferHistory;
+	}
+	
 	public abstract Player getPlayer(String playerName, String teamName, Optional<String> countryName);
 
-	public abstract PlayerTransferHistory getPlayerTransferHistory(String playerName, String teamName);
+	public abstract PlayerTransferHistory getPlayerTransfers(String playerName, String teamName);
 
 	public abstract List<Pair<String, Integer>> getLeagueTopScorersForTheSeason(Integer seasonYear, String leagueName);
 

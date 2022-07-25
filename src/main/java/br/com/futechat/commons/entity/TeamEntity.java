@@ -1,12 +1,14 @@
 package br.com.futechat.commons.entity;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -21,13 +23,18 @@ public class TeamEntity {
 	private String name;
 	private String code;
 	private String country;
+	private String logo;
 	private Integer founded;
 	
     @OneToMany(mappedBy="team")
-    private Set<PlayerEntity> players;
+    private List<PlayerEntity> players;
 
 	@Column(name = "api_football_id")
 	private Integer apiFootballId;
+	
+    @ManyToOne
+    @JoinColumn(name="league_id", nullable=false)
+    private LeagueEntity league;
 
 	public Long getId() {
 		return id;
@@ -75,6 +82,30 @@ public class TeamEntity {
 
 	public void setApiFootballId(Integer apiFootballId) {
 		this.apiFootballId = apiFootballId;
+	}
+
+	public String getLogo() {
+		return logo;
+	}
+
+	public void setLogo(String logo) {
+		this.logo = logo;
+	}
+
+	public List<PlayerEntity> getPlayers() {
+		return players;
+	}
+
+	public void setPlayers(List<PlayerEntity> players) {
+		this.players = players;
+	}
+
+	public LeagueEntity getLeague() {
+		return league;
+	}
+
+	public void setLeague(LeagueEntity league) {
+		this.league = league;
 	}
 
 }

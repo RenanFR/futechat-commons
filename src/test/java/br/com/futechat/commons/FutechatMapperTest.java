@@ -19,11 +19,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.futechat.commons.api.model.ApiFootballResponse;
 import br.com.futechat.commons.api.model.ApiFootballTransfersResponse;
 import br.com.futechat.commons.mapper.FutechatMapper;
+import br.com.futechat.commons.mapper.FutechatMapperImpl;
 import br.com.futechat.commons.model.PlayerTransferHistory;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ActiveProfiles("test")
-@SpringBootTest(classes = { FutechatMapper.class, ObjectMapperConfig.class })
+@SpringBootTest(classes = { FutechatMapperImpl.class, ObjectMapperConfig.class })
 public class FutechatMapperTest {
 
 	@Autowired
