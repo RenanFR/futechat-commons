@@ -26,6 +26,20 @@ public class TeamEntity {
 	private String logo;
 	private Integer founded;
 	
+	private String stadium;
+	
+	@Column(name = "stadium_capacity")
+	private Integer stadiumCapacity;
+	
+	@Column(name = "stadium_image")
+	private String stadiumImage;
+	
+	@Column(name = "stadium_api_football_id")
+	private Integer stadiumApiFootballId;
+	
+	@Column(name = "stadium_address")
+	private String stadiumAddress;
+	
     @OneToMany(mappedBy="team")
     private List<PlayerEntity> players;
 
@@ -106,6 +120,46 @@ public class TeamEntity {
 
 	public void setLeague(LeagueEntity league) {
 		this.league = league;
+	}
+
+	public String getStadium() {
+		return stadium;
+	}
+
+	public void setStadium(String stadium) {
+		this.stadium = stadium;
+	}
+
+	public Integer getStadiumCapacity() {
+		return stadiumCapacity;
+	}
+
+	public void setStadiumCapacity(Integer stadiumCapacity) {
+		this.stadiumCapacity = stadiumCapacity;
+	}
+
+	public String getStadiumImage() {
+		return stadiumImage;
+	}
+
+	public void setStadiumImage(String stadiumImage) {
+		this.stadiumImage = stadiumImage;
+	}
+
+	public Integer getStadiumApiFootballId() {
+		return stadiumApiFootballId;
+	}
+
+	public void setStadiumApiFootballId(Integer stadiumApiFootballId) {
+		this.stadiumApiFootballId = stadiumApiFootballId;
+	}
+
+	public String getStadiumAddress() {
+		return stadiumAddress;
+	}
+
+	public void setStadiumAddress(String stadiumAddress) {
+		this.stadiumAddress = stadiumAddress;
 	}
 
 }

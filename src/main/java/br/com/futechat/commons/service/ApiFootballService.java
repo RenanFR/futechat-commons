@@ -45,6 +45,7 @@ import br.com.futechat.commons.model.MatchEvent;
 import br.com.futechat.commons.model.MatchStatistics;
 import br.com.futechat.commons.model.Player;
 import br.com.futechat.commons.model.PlayerTransferHistory;
+import br.com.futechat.commons.model.Team;
 import br.com.futechat.commons.model.Transfer;
 
 @Service
@@ -264,6 +265,34 @@ public class ApiFootballService extends FutechatService {
 				.collect(Collectors.toList());
 		return currentSeasonLeagues;
 
+	}
+	
+	public List<Team> getTeamsFromObservedLeagues() {
+		List<League> observedLeagues = getLeagues().stream()
+				.filter(league -> (league.getName().equals("La Liga") && league.getCountry().equals("Spain"))
+						|| (league.getName().equals("Serie A") && league.getCountry().equals("Italy"))
+						|| (league.getName().equals("FA Cup") && league.getCountry().equals("England"))
+						|| (league.getName().equals("Major League Soccer") && league.getCountry().equals("USA"))
+						|| (league.getName().equals("Copa Do Brasil") && league.getCountry().equals("Brazil"))
+						|| (league.getName().equals("Serie A") && league.getCountry().equals("Brazil"))
+						|| (league.getName().equals("Serie B") && league.getCountry().equals("Brazil"))
+						|| (league.getName().equals("Primera Division") && league.getCountry().equals("Argentina"))
+						|| (league.getName().equals("Premier League") && league.getCountry().equals("England"))
+						|| (league.getName().equals("Bundesliga 1") && league.getCountry().equals("Germany"))
+						|| (league.getName().equals("Ligue 1") && league.getCountry().equals("France"))
+						|| (league.getName().equals("Primeira Liga") && league.getCountry().equals("Portugal"))
+						|| (league.getName().equals("Eredivisie") && league.getCountry().equals("Netherlands")))
+				
+				.collect(Collectors.toList());
+		List<Team> teamsOfInterest = observedLeagues.stream().map(league -> {
+			Map<String, String> teamQueryParameters = new HashMap<String, String>();
+			teamQueryParameters.put("league", league.getApiFootballId().toString());
+			teamQueryParameters.put("season", String.valueOf(LocalDate.now().getYear()));
+			List<Team> teams = mapper.fromApiFootballTeamsResponseToTeamList(apiFootballClient.teams(teamQueryParameters).response());
+			teams.forEach(team -> team.setLeague(league));
+			return teams;
+		}).flatMap(List::stream).collect(Collectors.toList());
+		return teamsOfInterest;
 	}
 
 }

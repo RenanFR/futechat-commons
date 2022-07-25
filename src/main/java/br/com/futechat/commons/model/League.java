@@ -2,6 +2,7 @@ package br.com.futechat.commons.model;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 public class League implements Serializable {
 	/**
@@ -70,6 +71,23 @@ public class League implements Serializable {
 
 	public void setTeams(List<Team> teams) {
 		this.teams = teams;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(apiFootballId);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		League other = (League) obj;
+		return Objects.equals(apiFootballId, other.apiFootballId);
 	}
 
 }

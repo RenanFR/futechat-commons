@@ -12,13 +12,16 @@ import br.com.futechat.commons.api.model.ApiFootballLeagueResponse;
 import br.com.futechat.commons.api.model.ApiFootballPlayer;
 import br.com.futechat.commons.api.model.ApiFootballResponse;
 import br.com.futechat.commons.api.model.ApiFootballTeam;
+import br.com.futechat.commons.api.model.ApiFootballTeamsResponse;
 import br.com.futechat.commons.api.model.ApiFootballTransfersResponse;
 import br.com.futechat.commons.entity.LeagueEntity;
 import br.com.futechat.commons.entity.PlayerEntity;
+import br.com.futechat.commons.entity.TeamEntity;
 import br.com.futechat.commons.entity.TransferEntity;
 import br.com.futechat.commons.model.League;
 import br.com.futechat.commons.model.Player;
 import br.com.futechat.commons.model.PlayerTransferHistory;
+import br.com.futechat.commons.model.Team;
 import br.com.futechat.commons.model.Transfer;
 
 @Mapper(componentModel = "spring")
@@ -104,5 +107,30 @@ public abstract class FutechatMapper {
 	
 	public abstract League fromLeagueEntityToLeague(LeagueEntity leagueEntity);
 	
-	public abstract List<League> fromLeagueEntityToLeagueList(List<LeagueEntity> leagueEntity);
+	public abstract List<League> fromLeagueEntityToLeagueList(List<LeagueEntity> list);
+	
+	@Mapping(target = "id", ignore = true)
+	@Mapping(source = "team.id", target = "apiFootballId")
+	@Mapping(source = "team.name", target = "name")
+	@Mapping(source = "team.code", target = "code")
+	@Mapping(source = "team.country", target = "country")
+	@Mapping(source = "team.logo", target = "logo")
+	@Mapping(source = "team.founded", target = "founded")
+	@Mapping(source = "venue.name", target = "stadium")
+	@Mapping(source = "venue.capacity", target = "stadiumCapacity")
+	@Mapping(source = "venue.image", target = "stadiumImage")
+	@Mapping(source = "venue.id", target = "stadiumApiFootballId")
+	@Mapping(source = "venue.address", target = "stadiumAddress")
+	public abstract Team fromApiFootballTeamsResponseToTeam(ApiFootballTeamsResponse apiFootballTeamsResponse);
+	
+	public abstract List<Team> fromApiFootballTeamsResponseToTeamList(List<ApiFootballTeamsResponse> apiFootballTeamsResponse);
+	
+	@Mapping(target = "league.teams", ignore = true)
+	public abstract Team fromTeamEntityToTeam(TeamEntity teamEntity);
+	
+	public abstract List<Team> fromTeamEntityToTeamList(List<TeamEntity> list);
+	
+	public abstract TeamEntity fromTeamToTeamEntity(Team team);
+	
+	public abstract List<TeamEntity> fromTeamToTeamEntityList(List<Team> list);
 }

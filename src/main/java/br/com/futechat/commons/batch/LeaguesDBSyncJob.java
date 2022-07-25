@@ -10,7 +10,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
-public class LeaguesDatabaseUpdateJob {
+public class LeaguesDBSyncJob {
+
+	public static final String LEAGUES_DB_SYNC_JOB = "leaguesDBSyncJob";
 
 	@Autowired
 	private JobBuilderFactory jobBuilderFactory;
@@ -27,28 +29,21 @@ public class LeaguesDatabaseUpdateJob {
 	@Autowired
 	private ApiFootballLeagueWriter writer;
 	
-	@Autowired
-	private PlatformTransactionManager transactionManager;
-
-	@Bean
-	protected Step fetchLeaguesFromApi() {
+	private Step fetchLeaguesFromApi() {
 		return stepBuilderFactory.get("fetchLeaguesFromApi").tasklet(reader).build();
 	}
 
-	@Bean
-	protected Step filterExistingDatabaseLeagues() {
+	private Step filterExistingDatabaseLeagues() {
 		return stepBuilderFactory.get("filterExistingDatabaseLeagues").tasklet(processor).build();
 	}
 
-	@Bean
-	protected Step saveRemainingLeaguesToDatabase() {
-		return stepBuilderFactory.get("saveRemainingLeaguesToDatabase").tasklet(writer)
-				.transactionManager(transactionManager).build();
+	private Step saveRemainingLeaguesToDatabase() {
+		return stepBuilderFactory.get("saveRemainingLeaguesToDatabase").tasklet(writer).build();
 	}
 
-	@Bean(name = "leagueDatabaseUpdateJob")
-	public Job leagueDatabaseUpdateJob() {
-		return jobBuilderFactory.get("leagueDatabaseUpdateJob").start(fetchLeaguesFromApi())
+	@Bean(name = LEAGUES_DB_SYNC_JOB)
+	public Job leaguesDBSyncJob() {
+		return jobBuilderFactory.get(LEAGUES_DB_SYNC_JOB).start(fetchLeaguesFromApi())
 				.next(filterExistingDatabaseLeagues()).next(saveRemainingLeaguesToDatabase()).build();
 	}
 

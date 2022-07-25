@@ -1,6 +1,7 @@
 package br.com.futechat.commons.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Team implements Serializable {
 	/**
@@ -13,6 +14,11 @@ public class Team implements Serializable {
 	private String code;
 	private String country;
 	private String logo;
+	private String stadium;
+	private Integer stadiumCapacity;
+	private String stadiumImage;
+	private Integer stadiumApiFootballId;
+	private String stadiumAddress;
 	private int founded;
 	private League league;
 
@@ -78,5 +84,62 @@ public class Team implements Serializable {
 
 	public void setLeague(League league) {
 		this.league = league;
+	}
+
+	public String getStadium() {
+		return stadium;
+	}
+
+	public void setStadium(String stadium) {
+		this.stadium = stadium;
+	}
+
+	public Integer getStadiumCapacity() {
+		return stadiumCapacity;
+	}
+
+	public void setStadiumCapacity(Integer stadiumCapacity) {
+		this.stadiumCapacity = stadiumCapacity;
+	}
+
+	public String getStadiumImage() {
+		return stadiumImage;
+	}
+
+	public void setStadiumImage(String stadiumImage) {
+		this.stadiumImage = stadiumImage;
+	}
+
+	public Integer getStadiumApiFootballId() {
+		return stadiumApiFootballId;
+	}
+
+	public void setStadiumApiFootballId(Integer stadiumApiFootballId) {
+		this.stadiumApiFootballId = stadiumApiFootballId;
+	}
+
+	public String getStadiumAddress() {
+		return stadiumAddress;
+	}
+
+	public void setStadiumAddress(String stadiumAddress) {
+		this.stadiumAddress = stadiumAddress;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(apiFootballId);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Team other = (Team) obj;
+		return Objects.equals(apiFootballId, other.apiFootballId);
 	}
 }

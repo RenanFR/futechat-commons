@@ -15,43 +15,43 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import br.com.futechat.commons.entity.LeagueEntity;
+import br.com.futechat.commons.entity.TeamEntity;
 import br.com.futechat.commons.mapper.FutechatMapper;
-import br.com.futechat.commons.model.League;
-import br.com.futechat.commons.repository.LeagueRepository;
+import br.com.futechat.commons.model.Team;
+import br.com.futechat.commons.repository.TeamRepository;
 
-public class ApiFootballLeagueProcessor implements Tasklet, StepExecutionListener {
+public class ApiFootballTeamProcessor implements Tasklet, StepExecutionListener {
 	
-	public static final Logger LOGGER = LoggerFactory.getLogger(ApiFootballLeagueProcessor.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(ApiFootballTeamProcessor.class);
 	
 	@Autowired
-	private LeagueRepository leagueRepository;
+	private TeamRepository teamRepository;
 	
 	@Autowired
 	private FutechatMapper mapper;
 	
-	private List<League> leaguesRead;
+	private List<Team> teamsRead;
 
 	@Override
 	public void beforeStep(StepExecution stepExecution) {
 		ExecutionContext executionContext = stepExecution.getJobExecution().getExecutionContext();
-		this.leaguesRead = (List<League>) executionContext.get("leaguesRead");		
+		this.teamsRead = (List<Team>) executionContext.get("teamsRead");		
 	}
 
 	@Override
 	public ExitStatus afterStep(StepExecution stepExecution) {
-		LOGGER.info("{} new leagues remaining to persist", leaguesRead.size());
-		stepExecution.getJobExecution().getExecutionContext().put("leaguesFiltered", this.leaguesRead);
+		LOGGER.info("{} new teams remaining to persist", teamsRead.size());
+		stepExecution.getJobExecution().getExecutionContext().put("teamsFiltered", this.teamsRead);
 		return ExitStatus.COMPLETED;
 	}
 
 	@Override
 	public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-		List<LeagueEntity> existingLeaguesInOurDatabase = leagueRepository.findAll();
-		List<League> leaguesAlreadySaved = mapper.fromLeagueEntityToLeagueList(existingLeaguesInOurDatabase).stream()
-				.filter(leaguesRead::contains).collect(Collectors.toList());
-		LOGGER.info("{} leagues already exists in our database", existingLeaguesInOurDatabase.size());
-		leaguesRead.removeAll(leaguesAlreadySaved);
+		List<TeamEntity> databaseExistingTeams = teamRepository.findAll();
+		List<Team> teamsAlreadySaved = mapper.fromTeamEntityToTeamList(databaseExistingTeams).stream()
+				.filter(teamsRead::contains).collect(Collectors.toList());
+		LOGGER.info("{} teams already exists in our database", teamsAlreadySaved.size());
+		teamsRead.removeAll(teamsAlreadySaved);
 		return RepeatStatus.FINISHED;
 	}
 

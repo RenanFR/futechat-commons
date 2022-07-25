@@ -26,46 +26,28 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class BatchConfig {
 
 	@Value("classpath:/org/springframework/batch/core/schema-drop-postgresql.sql")
-	private Resource schemaDropH2Sql;
+	private Resource schemaDropPostgresqlSql;
 
 	@Value("classpath:/org/springframework/batch/core/schema-postgresql.sql")
-	private Resource schemaH2Sql;
-
+	private Resource schemaPostgresqlSql;
+	
 	@Autowired
 	@Qualifier("rdsDataSource")
 	private DataSource dataSource;
-	
-	@Autowired
-	private PlatformTransactionManager transactionManager;
-	
+
 	@Autowired
 	private EntityManagerFactory entityManagerFactory;
 
 	@Bean
 	public DataSourceInitializer dataSourceInitializer() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
-		databasePopulator.addScript(schemaDropH2Sql);
-		databasePopulator.addScript(schemaH2Sql);
+		databasePopulator.addScript(schemaDropPostgresqlSql);
+		databasePopulator.addScript(schemaPostgresqlSql);
 		databasePopulator.setIgnoreFailedDrops(true);
 		DataSourceInitializer dataSourceInitializer = new DataSourceInitializer();
 		dataSourceInitializer.setDataSource(dataSource);
 		dataSourceInitializer.setDatabasePopulator(databasePopulator);
 		return dataSourceInitializer;
-	}
-
-	private JobRepository jobRepository() throws Exception {
-		JobRepositoryFactoryBean jobRepositoryFactoryBean = new JobRepositoryFactoryBean();
-		jobRepositoryFactoryBean.setDataSource(dataSource);
-		jobRepositoryFactoryBean.setTransactionManager(transactionManager);
-		jobRepositoryFactoryBean.afterPropertiesSet();
-		return (JobRepository) jobRepositoryFactoryBean.getObject();
-	}
-
-	public JobLauncher jobLauncher() throws Exception {
-		SimpleJobLauncher simpleJobLauncher = new SimpleJobLauncher();
-		simpleJobLauncher.setJobRepository(jobRepository());
-		simpleJobLauncher.afterPropertiesSet();
-		return simpleJobLauncher;
 	}
 
 	@Bean
