@@ -69,12 +69,18 @@ public abstract class FutechatMapper {
 	@Mapping(source = "player.name", target = "name")
 	@Mapping(source = "player.photo", target = "photo")
 	@Mapping(source = "player.weight", target = "weight")
-	@Mapping(target = "birth", expression="java(java.time.LocalDate.parse(response.player().birth().date(), java.time.format.DateTimeFormatter.ofPattern(\"yyyy-MM-dd\")))")
+	@Mapping(target = "birth", expression="java(java.util.Optional.ofNullable(response.player().birth().date()).isPresent() ? java.time.LocalDate.parse(response.player().birth().date(), java.time.format.DateTimeFormatter.ofPattern(\"yyyy-MM-dd\")) : null)")
 	@Mapping(source = "player.birth.place", target = "placeOfBirth")
 	@Mapping(source = "player.birth.country", target = "countryOfBirth")
 	@Mapping(target = "team.name", expression="java(apiFootballPlayersResponse.statistics().get(0).team().name())")
 	@Mapping(target = "team.apiFootballId", expression="java(apiFootballPlayersResponse.statistics().get(0).team().id())")
 	@Mapping(target = "team.logo", expression="java(apiFootballPlayersResponse.statistics().get(0).team().logo())")
+	@Mapping(target = "team.league.apiFootballId", expression="java(apiFootballPlayersResponse.statistics().get(0).league().id())")
+	@Mapping(target = "team.league.name", expression="java(apiFootballPlayersResponse.statistics().get(0).league().name())")
+	@Mapping(target = "team.league.country", expression="java(apiFootballPlayersResponse.statistics().get(0).league().country())")
+	@Mapping(target = "team.league.logo", expression="java(apiFootballPlayersResponse.statistics().get(0).league().logo())")
+	@Mapping(target = "team.league.flag", expression="java(apiFootballPlayersResponse.statistics().get(0).league().flag())")
+	@Mapping(target = "team.league.season", expression="java(apiFootballPlayersResponse.statistics().get(0).league().season())")
 	public abstract Player fromApiFootballPlayersResponseToPlayer(ApiFootballPlayersResponse response);
 	
 	public abstract PlayerEntity fromPlayerToPlayerEntity(Player player);

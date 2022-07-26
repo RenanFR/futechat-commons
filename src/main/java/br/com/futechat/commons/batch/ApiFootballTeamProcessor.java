@@ -30,18 +30,18 @@ public class ApiFootballTeamProcessor implements Tasklet, StepExecutionListener 
 	@Autowired
 	private FutechatMapper mapper;
 	
-	private List<Team> teamsRead;
+	private List<Team> teamsFound;
 
 	@Override
 	public void beforeStep(StepExecution stepExecution) {
 		ExecutionContext executionContext = stepExecution.getJobExecution().getExecutionContext();
-		this.teamsRead = (List<Team>) executionContext.get("teamsRead");		
+		this.teamsFound = (List<Team>) executionContext.get("teamsFound");		
 	}
 
 	@Override
 	public ExitStatus afterStep(StepExecution stepExecution) {
-		LOGGER.info("{} new teams remaining to persist", teamsRead.size());
-		stepExecution.getJobExecution().getExecutionContext().put("teamsFiltered", this.teamsRead);
+		LOGGER.info("{} new teams remaining to persist", teamsFound.size());
+		stepExecution.getJobExecution().getExecutionContext().put("teamsFiltered", this.teamsFound);
 		return ExitStatus.COMPLETED;
 	}
 
@@ -49,9 +49,9 @@ public class ApiFootballTeamProcessor implements Tasklet, StepExecutionListener 
 	public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 		List<TeamEntity> databaseExistingTeams = teamRepository.findAll();
 		List<Team> teamsAlreadySaved = mapper.fromTeamEntityToTeamList(databaseExistingTeams).stream()
-				.filter(teamsRead::contains).collect(Collectors.toList());
+				.filter(teamsFound::contains).collect(Collectors.toList());
 		LOGGER.info("{} teams already exists in our database", teamsAlreadySaved.size());
-		teamsRead.removeAll(teamsAlreadySaved);
+		teamsFound.removeAll(teamsAlreadySaved);
 		return RepeatStatus.FINISHED;
 	}
 

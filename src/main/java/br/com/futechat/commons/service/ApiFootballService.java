@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import br.com.futechat.commons.api.client.ApiFootballClient;
@@ -32,7 +34,6 @@ import br.com.futechat.commons.api.model.ApiFootballStatistics;
 import br.com.futechat.commons.api.model.ApiFootballStatisticsResponse;
 import br.com.futechat.commons.api.model.ApiFootballStatisticsType;
 import br.com.futechat.commons.api.model.ApiFootballTransfersResponse;
-import br.com.futechat.commons.batch.ApiFootballLeagueWriter;
 import br.com.futechat.commons.exception.FixtureNotFoundException;
 import br.com.futechat.commons.exception.PlayerNotFoundException;
 import br.com.futechat.commons.mapper.FutechatMapper;
@@ -65,6 +66,9 @@ public class ApiFootballService extends FutechatService {
 	private ApiFootballClient apiFootballClient;
 
 	private FutechatMapper mapper;
+	
+	@Value("${apiFootball.leaguesToFetch}")
+	private String leaguesToFetch;
 	
 	@Autowired
 	public ApiFootballService(ApiFootballClient apiFootballClient, FutechatMapper mapper) {
@@ -254,21 +258,12 @@ public class ApiFootballService extends FutechatService {
 		return teamsOfInterest;
 	}
 
-	private List<League> getLeaguesOfInterest() {
+	public List<League> getLeaguesOfInterest() {
+		List<Pair<String, String>> leaguesConfiguredToPersist = Arrays.asList(leaguesToFetch.split(",")).stream()
+				.map(leagueString -> Pair.with(leagueString.split(":")[0], leagueString.split(":")[1]))
+				.collect(Collectors.toList());
 		List<League> observedLeagues = getLeagues().stream()
-				.filter(league -> (league.getName().equals("La Liga") && league.getCountry().equals("Spain"))
-						|| (league.getName().equals("Serie A") && league.getCountry().equals("Italy"))
-						|| (league.getName().equals("FA Cup") && league.getCountry().equals("England"))
-						|| (league.getName().equals("Major League Soccer") && league.getCountry().equals("USA"))
-						|| (league.getName().equals("Copa Do Brasil") && league.getCountry().equals("Brazil"))
-						|| (league.getName().equals("Serie A") && league.getCountry().equals("Brazil"))
-						|| (league.getName().equals("Serie B") && league.getCountry().equals("Brazil"))
-						|| (league.getName().equals("Primera Division") && league.getCountry().equals("Argentina"))
-						|| (league.getName().equals("Premier League") && league.getCountry().equals("England"))
-						|| (league.getName().equals("Bundesliga 1") && league.getCountry().equals("Germany"))
-						|| (league.getName().equals("Ligue 1") && league.getCountry().equals("France"))
-						|| (league.getName().equals("Primeira Liga") && league.getCountry().equals("Portugal"))
-						|| (league.getName().equals("Eredivisie") && league.getCountry().equals("Netherlands")))
+				.filter(league -> leaguesConfiguredToPersist.contains(Pair.with(league.getName(), league.getCountry())))
 				.collect(Collectors.toList());
 		return observedLeagues;
 	}
@@ -276,36 +271,41 @@ public class ApiFootballService extends FutechatService {
 	public List<Player> getPlayersFromObservedLeagues() {
 		List<Player> players = new ArrayList<>();
 		getLeaguesOfInterest().stream().map(League::getApiFootballId).forEach(leagueId -> {
-			Map<String, String> playersRequestQueryParameters = new HashMap<String, String>();
-			playersRequestQueryParameters.put(SEASON_PARAM, String.valueOf(LocalDate.now().getYear()));
-			playersRequestQueryParameters.put(LEAGUE_PARAM, leagueId.toString());
-			ApiFootballResponse<ApiFootballPlayersResponse> response = apiFootballClient.players(playersRequestQueryParameters);
-			addAllPlayersFromCurrentPage(players, response);
-			int currentPage = response.paging().current();
-			int totalPages = response.paging().total();
-			for (int i = currentPage + 1; i <= totalPages; i++) {
-				currentPage = i;
-				LOGGER.info("Fetching players of league {} from API-FOOTBALL at page {} of {}", leagueId, currentPage, totalPages);
-				if (playersRequestQueryParameters.containsKey("page")) {
-					
-					playersRequestQueryParameters.remove("page");
-					playersRequestQueryParameters.put("page", String.valueOf(currentPage));
-				} else {
-					playersRequestQueryParameters.put("page", String.valueOf(currentPage));
-				}
-				response = apiFootballClient.players(playersRequestQueryParameters);
-				addAllPlayersFromCurrentPage(players, response);
-			}
+			players.addAll(getPlayersFromLeague(leagueId));
 		});
 		return players;
-		
 	}
 
-	private void addAllPlayersFromCurrentPage(List<Player> players,
-			ApiFootballResponse<ApiFootballPlayersResponse> response) {
+	public List<Player> getPlayersFromLeague(Integer leagueId) {
+		List<Player> players = new ArrayList<>();
+		Map<String, String> playersRequestQueryParameters = new HashMap<String, String>();
+		playersRequestQueryParameters.put(SEASON_PARAM, String.valueOf(LocalDate.now().getYear()));
+		playersRequestQueryParameters.put(LEAGUE_PARAM, leagueId.toString());
+		ApiFootballResponse<ApiFootballPlayersResponse> response = apiFootballClient.players(playersRequestQueryParameters);
+		players.addAll(addAllPlayersFromCurrentPage(response));
+		int currentPage = response.paging().current();
+		int totalPages = response.paging().total();
+		for (int i = currentPage + 1; i <= totalPages; i++) {
+			currentPage = i;
+			LOGGER.info("Fetching players of league {} from API-FOOTBALL at page {} of {}", leagueId, currentPage, totalPages);
+			if (playersRequestQueryParameters.containsKey("page")) {
+				
+				playersRequestQueryParameters.remove("page");
+				playersRequestQueryParameters.put("page", String.valueOf(currentPage));
+			} else {
+				playersRequestQueryParameters.put("page", String.valueOf(currentPage));
+			}
+			response = apiFootballClient.players(playersRequestQueryParameters);
+			players.addAll(addAllPlayersFromCurrentPage(response));
+		}
+		return players;
+	}
+	
+	private List<Player> addAllPlayersFromCurrentPage(ApiFootballResponse<ApiFootballPlayersResponse> response) {
 		List<Player> currentPagePlayers = response.response().stream()
 				.map(mapper::fromApiFootballPlayersResponseToPlayer).collect(Collectors.toList());
-		players.addAll(currentPagePlayers);
+		return currentPagePlayers;
+
 	}
 
 }

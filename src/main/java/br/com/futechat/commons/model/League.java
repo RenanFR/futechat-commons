@@ -14,6 +14,8 @@ public class League implements Serializable {
 	private String name;
 	private String type;
 	private String country;
+	private String flag;
+	private Integer season;
 	private String logo;
 	private List<Team> teams;
 
@@ -88,6 +90,22 @@ public class League implements Serializable {
 			return false;
 		League other = (League) obj;
 		return Objects.equals(apiFootballId, other.apiFootballId);
+	}
+
+	public String getFlag() {
+		return flag;
+	}
+
+	public void setFlag(String flag) {
+		this.flag = flag;
+	}
+
+	public Integer getSeason() {
+		return season;
+	}
+
+	public void setSeason(Integer season) {
+		this.season = season;
 	}
 
 }

@@ -32,7 +32,7 @@ public class ApiFootballTeamReader implements Tasklet, StepExecutionListener {
 
 	@Override
 	public ExitStatus afterStep(StepExecution stepExecution) {
-		stepExecution.getJobExecution().getExecutionContext().put("teamsRead", this.teams);
+		stepExecution.getJobExecution().getExecutionContext().put("teamsFound", this.teams);
 		return ExitStatus.COMPLETED;
 	}
 
