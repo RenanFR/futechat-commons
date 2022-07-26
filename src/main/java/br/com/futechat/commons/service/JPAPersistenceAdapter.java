@@ -1,89 +1,54 @@
 package br.com.futechat.commons.service;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import br.com.futechat.commons.entity.PlayerEntity;
 import br.com.futechat.commons.entity.TeamEntity;
-import br.com.futechat.commons.entity.TransferEntity;
+import br.com.futechat.commons.exception.LeagueNotFoundException;
+import br.com.futechat.commons.exception.TeamNotFoundException;
 import br.com.futechat.commons.mapper.FutechatMapper;
-import br.com.futechat.commons.model.Player;
-import br.com.futechat.commons.model.PlayerTransferHistory;
-import br.com.futechat.commons.repository.PlayerRepository;
+import br.com.futechat.commons.model.League;
+import br.com.futechat.commons.model.Team;
+import br.com.futechat.commons.repository.LeagueRepository;
 import br.com.futechat.commons.repository.TeamRepository;
-import br.com.futechat.commons.repository.TransferRepository;
 
 @Service
 public class JPAPersistenceAdapter extends PersistenceAdapter {
 	
-	private PlayerRepository playerRepository;
 	private TeamRepository teamRepository;
-	private TransferRepository transferRepository;
+	private LeagueRepository leagueRepository;
 	private FutechatMapper mapper;
-	
-	public JPAPersistenceAdapter(PlayerRepository playerRepository, TeamRepository teamRepository,
-			TransferRepository transferRepository, FutechatMapper mapper) {
-		this.playerRepository = playerRepository;
+
+	public JPAPersistenceAdapter(TeamRepository teamRepository, LeagueRepository leagueRepository,
+			FutechatMapper mapper) {
 		this.teamRepository = teamRepository;
-		this.transferRepository = transferRepository;
+		this.leagueRepository = leagueRepository;
 		this.mapper = mapper;
 	}
 
 	@Override
-	public PlayerEntity savePlayerAndTeam(Player player) {
-		PlayerEntity playerEntity = mapper.fromPlayerToPlayerEntity(player);
-		playerEntity.setTeam(teamRepository.findByNameAndCountry(player.team().getName(), player.team().getCountry())
-				.orElse(teamRepository.saveAndFlush(playerEntity.getTeam())));
-		return playerRepository.save(playerEntity);
+	public Team getTeamByNameAndCountry(String teamName, String countryName) {
+		Optional<TeamEntity> possibleTeam = teamRepository.findByNameAndCountry(teamName, countryName);
+		return mapper.fromTeamEntityToTeam(possibleTeam.orElseThrow(() -> new TeamNotFoundException(teamName)));
 	}
 
 	@Override
-	public List<Player> getPlayerFromTeam(String playerName, String teamName) {
-		return mapper.fromPlayerEntityToPlayerList(playerRepository.findByNameAndTeamName(playerName, teamName));
-		
+	public Team getTeamByName(String teamName) {
+		Optional<TeamEntity> possibleTeam = teamRepository.findByName(teamName);
+		return mapper.fromTeamEntityToTeam(possibleTeam.orElseThrow(() -> new TeamNotFoundException(teamName)));
 	}
 
 	@Override
-	public void savePlayerTransfers(PlayerTransferHistory playerTransferHistory) {
-		List<PlayerEntity> existingPlayer = playerRepository.findByNameAndTeamName(
-				playerTransferHistory.player().name(), playerTransferHistory.player().team().getName());
-		existingPlayer.stream().findFirst().ifPresentOrElse(player -> {
-			convertAndSaveTransfers(playerTransferHistory, player);
-		}, () -> {
-			convertAndSaveTransfers(playerTransferHistory, savePlayerAndTeam(playerTransferHistory.player()));
-		});
-	}
-
-	private void convertAndSaveTransfers(PlayerTransferHistory playerTransferHistory, PlayerEntity playerEntity) {
-		List<TransferEntity> transfersToPersist = mapper
-				.fromTransferListToTransferEntity(playerTransferHistory.transfers());
-		transfersToPersist.stream().forEach(transfer -> {
-			transfer.setPlayer(playerEntity);
-			transfer.setTeamIn(saveTeamIfNotExists(transfer.getTeamIn()));
-			transfer.setTeamOut(saveTeamIfNotExists(transfer.getTeamOut()));
-		});
-		transferRepository.saveAll(transfersToPersist);
-	}
-
-	private TeamEntity saveTeamIfNotExists(TeamEntity team) {
-		List<TeamEntity> existingTeamWithThisName = teamRepository.findByName(team.getName());
-		if (existingTeamWithThisName.isEmpty()) {
-			return teamRepository.save(team);
-		}
-		return existingTeamWithThisName.stream().findFirst().get();
+	public League getLeagueByName(String leagueName) {
+		return mapper.fromLeagueEntityToLeague(
+				leagueRepository.findByName(leagueName).orElseThrow(() -> new LeagueNotFoundException(leagueName)));
 	}
 
 	@Override
-	public Optional<PlayerTransferHistory> getPlayerWithTransferHistory(String playerName, String teamName) {
-		List<PlayerEntity> playersFound = playerRepository.findByNameAndTeamName(playerName, teamName);
-		Optional<PlayerEntity> possiblePlayer = playersFound.stream().findFirst();
-		if (possiblePlayer.isPresent()) {
-			return Optional.ofNullable(mapper.fromPlayerEntityToPlayerTransferHistory(possiblePlayer.get()));
-			
-		}
-		return Optional.empty();
+	public League getLeagueByNameAndCountry(String leagueName, String countryName) {
+		return mapper.fromLeagueEntityToLeague(leagueRepository.findByNameAndCountry(leagueName, countryName)
+				.orElseThrow(() -> new LeagueNotFoundException(leagueName)));
 	}
 
 }

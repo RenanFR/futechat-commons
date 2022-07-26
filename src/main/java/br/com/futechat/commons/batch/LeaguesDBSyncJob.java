@@ -12,7 +12,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 public class LeaguesDBSyncJob {
 
-	public static final String LEAGUES_DB_SYNC_JOB = "leaguesDBSyncJob";
+	public static final String LEAGUES_DB_SYNC_JOB = "leaguesDbSyncJob";
 
 	@Autowired
 	private JobBuilderFactory jobBuilderFactory;

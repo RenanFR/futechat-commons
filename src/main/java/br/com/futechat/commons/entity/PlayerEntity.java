@@ -1,7 +1,6 @@
 package br.com.futechat.commons.entity;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,7 +9,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -45,9 +43,6 @@ public class PlayerEntity {
 	@Column(name = "api_football_id")
 	private Integer apiFootballId;
 	
-    @OneToMany(mappedBy="player")
-    private List<TransferEntity> transfers;
-
 	public Long getId() {
 		return id;
 	}
@@ -134,14 +129,6 @@ public class PlayerEntity {
 
 	public void setBirth(LocalDate birth) {
 		this.birth = birth;
-	}
-
-	public List<TransferEntity> getTransfers() {
-		return transfers;
-	}
-
-	public void setTransfers(List<TransferEntity> transfers) {
-		this.transfers = transfers;
 	}
 
 }

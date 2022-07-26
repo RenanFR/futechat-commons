@@ -9,7 +9,7 @@ public interface FutechatTextService {
 
 	String getPlayerTransferHistory(String playerName, String teamName);
 	
-	String getLeagueTopScorersForTheSeason(Integer seasonYear, String leagueName);
+	String getLeagueTopScorersForTheSeason(Integer seasonYear, String leagueName, String countryName);
 	
 	String getSoccerMatches(Optional<String> leagueName, Optional<String> countryName, Optional<LocalDate> schedule);
 	

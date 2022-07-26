@@ -48,11 +48,12 @@ public class ApiFootballTextService implements FutechatTextService {
     }
 
     @Override
-    public String getLeagueTopScorersForTheSeason(Integer seasonYear, String leagueName) {
+    public String getLeagueTopScorersForTheSeason(Integer seasonYear, String leagueName, String countryName) {
         StringBuilder finalTextLeagueTopScorers = new StringBuilder();
         finalTextLeagueTopScorers.append("Artilheiros da " + leagueName + " no ano " + seasonYear + ":\n");
         List<Pair<String, Integer>> topScorers = apiFootballService.getLeagueTopScorersForTheSeason(seasonYear,
-                leagueName);
+                leagueName,
+                countryName);
         Comparator<Pair<String, Integer>> pairComparator = (Pair<String, Integer> pairOne,
                                                             Pair<String, Integer> pairTwo) -> pairOne.getValue1().compareTo(pairTwo.getValue1());
         String goalScorerText = topScorers.stream().sorted(pairComparator.reversed())

@@ -10,6 +10,7 @@ import org.mapstruct.Named;
 import br.com.futechat.commons.api.model.ApiFootballLeague;
 import br.com.futechat.commons.api.model.ApiFootballLeagueResponse;
 import br.com.futechat.commons.api.model.ApiFootballPlayer;
+import br.com.futechat.commons.api.model.ApiFootballPlayersResponse;
 import br.com.futechat.commons.api.model.ApiFootballResponse;
 import br.com.futechat.commons.api.model.ApiFootballTeam;
 import br.com.futechat.commons.api.model.ApiFootballTeamsResponse;
@@ -17,7 +18,6 @@ import br.com.futechat.commons.api.model.ApiFootballTransfersResponse;
 import br.com.futechat.commons.entity.LeagueEntity;
 import br.com.futechat.commons.entity.PlayerEntity;
 import br.com.futechat.commons.entity.TeamEntity;
-import br.com.futechat.commons.entity.TransferEntity;
 import br.com.futechat.commons.model.League;
 import br.com.futechat.commons.model.Player;
 import br.com.futechat.commons.model.PlayerTransferHistory;
@@ -55,36 +55,31 @@ public abstract class FutechatMapper {
 	@Mapping(source = "player.name", target = "name")
 	public abstract Player fromApiFootballPlayerAndTeamToPlayer(ApiFootballPlayer player, ApiFootballTeam team);
 	
+	@Mapping(target = "id", ignore = true)
+	@Mapping(source = "id", target = "apiFootballId")
+	@Mapping(target = "birth", expression="java(java.time.LocalDate.parse(player.birth().date(), java.time.format.DateTimeFormatter.ofPattern(\"yyyy-MM-dd\")))")
+	@Mapping(source = "player.birth.place", target = "placeOfBirth")
+	@Mapping(source = "player.birth.country", target = "countryOfBirth")
+	public abstract Player fromApiFootballPlayerToPlayer(ApiFootballPlayer player);
+	
+	@Mapping(target = "id", ignore = true)
+	@Mapping(source = "player.id", target = "apiFootballId")
+	@Mapping(source = "player.height", target = "height")
+	@Mapping(source = "player.nationality", target = "nationality")
+	@Mapping(source = "player.name", target = "name")
+	@Mapping(source = "player.photo", target = "photo")
+	@Mapping(source = "player.weight", target = "weight")
+	@Mapping(target = "birth", expression="java(java.time.LocalDate.parse(response.player().birth().date(), java.time.format.DateTimeFormatter.ofPattern(\"yyyy-MM-dd\")))")
+	@Mapping(source = "player.birth.place", target = "placeOfBirth")
+	@Mapping(source = "player.birth.country", target = "countryOfBirth")
+	@Mapping(target = "team.name", expression="java(apiFootballPlayersResponse.statistics().get(0).team().name())")
+	@Mapping(target = "team.apiFootballId", expression="java(apiFootballPlayersResponse.statistics().get(0).team().id())")
+	@Mapping(target = "team.logo", expression="java(apiFootballPlayersResponse.statistics().get(0).team().logo())")
+	public abstract Player fromApiFootballPlayersResponseToPlayer(ApiFootballPlayersResponse response);
+	
 	public abstract PlayerEntity fromPlayerToPlayerEntity(Player player);
 	
-	@Mapping(source = "apiFootballId", target = "player.id")
-	@Mapping(source = "name", target = "player.name")
-	@Mapping(source = "height", target = "player.height")
-	@Mapping(source = "placeOfBirth", target = "player.placeOfBirth")
-	@Mapping(source = "countryOfBirth", target = "player.countryOfBirth")
-	@Mapping(source = "nationality", target = "player.nationality")
-	@Mapping(source = "weight", target = "player.weight")
-	@Mapping(source = "photo", target = "player.photo")
-	@Mapping(source = "birth", target = "player.birth")
-	@Mapping(target = "transfers", source = "transfers", qualifiedByName = "fromTransferEntityToTransferList")
-	public abstract PlayerTransferHistory fromPlayerEntityToPlayerTransferHistory(PlayerEntity playerEntity);
-	
-	@Mapping(source = "teamIn", target = "teamIn.name")
-	@Mapping(source = "teamOut", target = "teamOut.name")
-	@Mapping(source = "date", target = "transferDate")
-	@Mapping(source = "type", target = "transferType")
-	public abstract TransferEntity fromTransferToTransferEntity(Transfer transfer);
-	
-	@Mapping(source = "teamIn.name", target = "teamIn")
-	@Mapping(source = "teamOut.name", target = "teamOut")
-	@Mapping(source = "transferDate", target = "date")
-	@Mapping(source = "transferType", target = "type")
-	public abstract Transfer fromTransferEntityToTransfer(TransferEntity transferEntity);
-	
-	public abstract List<TransferEntity> fromTransferListToTransferEntity(List<Transfer> transferList);
-	
-	@Named("fromTransferEntityToTransferList")
-	public abstract List<Transfer> fromTransferEntityToTransferList(List<TransferEntity> transferEntityList);
+	public abstract List<PlayerEntity> fromPlayerToPlayerEntityList(List<Player> players);
 	
 	public abstract List<Player> fromPlayerEntityToPlayerList(List<PlayerEntity> entities);
 	

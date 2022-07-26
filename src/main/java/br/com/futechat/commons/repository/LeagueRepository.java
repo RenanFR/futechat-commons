@@ -11,5 +11,8 @@ import br.com.futechat.commons.entity.LeagueEntity;
 public interface LeagueRepository extends JpaRepository<LeagueEntity, Long> {
 	
 	Optional<LeagueEntity> findByApiFootballId(Integer apiFootballId);
-
+	
+	Optional<LeagueEntity> findByName(String leagueName);
+	
+	Optional<LeagueEntity> findByNameAndCountry(String teamName, String countryName);
 }

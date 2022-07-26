@@ -61,14 +61,14 @@ public class ApiFootballTextServiceTest {
 	
 	@Test
 	public void whenNonExistingLeagueIsSearchedThenExceptionTextShouldBeReturned() {
-		String leagueTopScorers = apiFootballTextService.getLeagueTopScorersForTheSeason(2021, "Desimpedidos");
+		String leagueTopScorers = apiFootballTextService.getLeagueTopScorersForTheSeason(2021, "Desimpedidos", "England");
 		assertEquals("A liga Desimpedidos nao foi encontrada", leagueTopScorers);
 	}
 
 	@Test
 	public void textWithTopScorersShouldBeAvailableToRead() {
 		String leagueTopScorersForTheSeason = apiFootballTextService.getLeagueTopScorersForTheSeason(2021,
-				"Premier League");
+				"Premier League", "England");
 		assertTrue(leagueTopScorersForTheSeason.contains("Artilheiros"));
 	}
 	

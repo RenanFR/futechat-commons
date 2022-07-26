@@ -1,20 +1,16 @@
 package br.com.futechat.commons.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import br.com.futechat.commons.entity.PlayerEntity;
-import br.com.futechat.commons.model.Player;
-import br.com.futechat.commons.model.PlayerTransferHistory;
+import br.com.futechat.commons.model.League;
+import br.com.futechat.commons.model.Team;
 
 public abstract class PersistenceAdapter {
 	
-	public abstract PlayerEntity savePlayerAndTeam(Player player);
+	public abstract Team getTeamByNameAndCountry(String teamName, String countryName);
 	
-	public abstract List<Player> getPlayerFromTeam(String playerName, String teamName);
+	public abstract Team getTeamByName(String teamName);
 	
-	public abstract Optional<PlayerTransferHistory> getPlayerWithTransferHistory(String playerName, String teamName);
+	public abstract League getLeagueByName(String leagueName);
 	
-	public abstract void savePlayerTransfers(PlayerTransferHistory playerTransferHistory);
+	public abstract League getLeagueByNameAndCountry(String leagueName, String countryName);
 
 }

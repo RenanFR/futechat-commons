@@ -1,6 +1,5 @@
 package br.com.futechat.commons.repository;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +12,6 @@ public interface TeamRepository extends JpaRepository<TeamEntity, Long> {
 	
 	Optional<TeamEntity> findByNameAndApiFootballId(String teamName, Integer apiFootballId);
 	
-	List<TeamEntity> findByName(String teamName);
+	Optional<TeamEntity> findByName(String teamName);
 
 }

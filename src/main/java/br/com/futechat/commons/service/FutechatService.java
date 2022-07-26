@@ -7,54 +7,54 @@ import java.util.Optional;
 import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import br.com.futechat.commons.model.League;
 import br.com.futechat.commons.model.Match;
 import br.com.futechat.commons.model.Player;
 import br.com.futechat.commons.model.PlayerTransferHistory;
+import br.com.futechat.commons.model.Team;
 
 public abstract class FutechatService {
 	
 	private PersistenceAdapter persistenceAdapter;
 	
 	public String getPlayerHeight(String playerName, String teamName, Optional<String> countryName) {
-		Optional<Player> optionalPlayer = persistenceAdapter.getPlayerFromTeam(playerName, teamName)
-				.stream().findFirst();
-
-		Player player = optionalPlayer.orElse(getPlayer(playerName, teamName, countryName));
-		if (!optionalPlayer.isPresent()) {
-			persistenceAdapter.savePlayerAndTeam(player);
-		}
-		return player.height();
+		
+		Team team = countryName.isPresent() ? persistenceAdapter.getTeamByNameAndCountry(teamName, countryName.get())
+				: persistenceAdapter.getTeamByName(teamName); 
+		Player player = getPlayer(playerName, team);
+		return player.getHeight();
 	}
 
 	public PlayerTransferHistory getPlayerTransferHistory(String playerName, String teamName) {
-		
-		Optional<PlayerTransferHistory> optionalPlayerTransferHistory = persistenceAdapter.getPlayerWithTransferHistory(playerName, teamName);
-		
-		if (!optionalPlayerTransferHistory.isPresent()) {
-			return fetchAndSavePlayerWithTransfers(playerName, teamName);
-		} else {
-			if (!optionalPlayerTransferHistory.get().transfers().isEmpty()) {
-				return optionalPlayerTransferHistory.get();
-			} else {
-				return fetchAndSavePlayerWithTransfers(playerName, teamName);
-			}
-		}
-		
-	}
-
-	private PlayerTransferHistory fetchAndSavePlayerWithTransfers(String playerName, String teamName) {
-		PlayerTransferHistory playerTransferHistory = getPlayerTransfers(playerName, teamName);
-		persistenceAdapter.savePlayerTransfers(playerTransferHistory);
+		Team team = persistenceAdapter.getTeamByName(teamName);
+		PlayerTransferHistory playerTransferHistory = getPlayerTransfers(playerName, team);
 		return playerTransferHistory;
 	}
+
+	public List<Pair<String, Integer>> getLeagueTopScorersForTheSeason(Integer seasonYear, String leagueName, String countryName) {
+		return getLeagueTopScorersForTheSeason(seasonYear, persistenceAdapter.getLeagueByNameAndCountry(leagueName, countryName));
+	}
 	
-	public abstract Player getPlayer(String playerName, String teamName, Optional<String> countryName);
+	public List<Match> getSoccerMatches(Optional<String> leagueName, Optional<String> countryName,
+			Optional<LocalDate> schedule) {
+		if (leagueName.isPresent() && countryName.isPresent()) {
 
-	public abstract PlayerTransferHistory getPlayerTransfers(String playerName, String teamName);
+			return getSoccerMatches(
+					Optional.ofNullable(
+							persistenceAdapter.getLeagueByNameAndCountry(leagueName.get(), countryName.get())),
+					schedule);
+		}
+		return getSoccerMatches(Optional.empty(), schedule);
 
-	public abstract List<Pair<String, Integer>> getLeagueTopScorersForTheSeason(Integer seasonYear, String leagueName);
+	}
+	
+	public abstract Player getPlayer(String playerName, Team team);
 
-	public abstract List<Match> getSoccerMatches(Optional<String> leagueName, Optional<String> countryName,
+	public abstract PlayerTransferHistory getPlayerTransfers(String playerName, Team team);
+
+	public abstract List<Pair<String, Integer>> getLeagueTopScorersForTheSeason(Integer seasonYear, League league);
+
+	public abstract List<Match> getSoccerMatches(Optional<League> league,
 			Optional<LocalDate> schedule);
 
 	public abstract Match getFixtureStatistics(String homeTeam, String awayTeam, LocalDate matchDate);
