@@ -5,11 +5,12 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
+@ConditionalOnProperty(prefix = "apiFootball", name = "leaguesSynchronizationEnabled", havingValue = "true")
 public class LeaguesDBSyncJob {
 
 	public static final String LEAGUES_DB_SYNC_JOB = "leaguesDbSyncJob";

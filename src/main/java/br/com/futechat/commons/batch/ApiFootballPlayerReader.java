@@ -1,6 +1,5 @@
 package br.com.futechat.commons.batch;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +34,6 @@ public class ApiFootballPlayerReader implements ItemReader<List<Player>> {
 	@Override
 	public List<Player> read()
 			throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
-		this.observedLeagues.removeIf(league -> List.of(253, 135, 94, 140, 88, 61, 71, 39, 72, 135, 73).contains(league.getApiFootballId()));
 		Optional<League> currentLeague = Optional.ofNullable(this.observedLeagues.poll());
 		if (currentLeague.isPresent()) {
 			

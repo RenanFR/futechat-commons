@@ -11,12 +11,14 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import br.com.futechat.commons.model.Player;
 
 @Configuration
+@ConditionalOnProperty(prefix = "apiFootball", name = "playersSynchronizationEnabled", havingValue = "true")
 public class PlayersDBSyncJob {
 
 	public static final String PLAYERS_DB_SYNC_JOB = "playersDbSyncJob";
