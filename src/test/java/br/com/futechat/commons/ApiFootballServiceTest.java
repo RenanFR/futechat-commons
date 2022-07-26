@@ -4,9 +4,6 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,11 +25,11 @@ import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemp
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
 import br.com.futechat.commons.api.client.config.FeignConfig;
-import br.com.futechat.commons.entity.TeamEntity;
 import br.com.futechat.commons.mapper.FutechatMapper;
 import br.com.futechat.commons.mapper.FutechatMapperImpl;
 import br.com.futechat.commons.model.Match;
 import br.com.futechat.commons.repository.LeagueRepository;
+import br.com.futechat.commons.repository.PlayerRepository;
 import br.com.futechat.commons.repository.TeamRepository;
 import br.com.futechat.commons.service.ApiFootballService;
 import br.com.futechat.commons.service.FutechatService;
@@ -56,6 +53,9 @@ public class ApiFootballServiceTest {
 	private TeamRepository teamRepository;
 	
 	@Mock
+	private PlayerRepository playerRepository;
+	
+	@Mock
 	private LeagueRepository leagueRepository;
 
 	@Autowired
@@ -65,21 +65,19 @@ public class ApiFootballServiceTest {
 
 	@Before
 	public void setup() {
-		persistenceAdapter = new JPAPersistenceAdapter(teamRepository, leagueRepository, mapper);
+		persistenceAdapter = new JPAPersistenceAdapter(teamRepository, leagueRepository, playerRepository, mapper);
 		futechatService.setPersistenceAdapter(persistenceAdapter);
 	}
 
 	@Test
 	public void shouldFetchNeyzinhoHeight() {
 		assertEquals("175 cm", futechatService.getPlayerHeight("Neymar", "Paris Saint Germain", Optional.empty()));
-		verify(teamRepository, times(1)).save(any(TeamEntity.class));
 	}
 
 	@Test
 	public void shouldGetNeymarTransferHistory() {
 		assertEquals("Santos",
 				futechatService.getPlayerTransferHistory("Neymar", "Paris Saint Germain").transfers().get(0).teamOut());
-		verify(teamRepository, times(1)).save(any(TeamEntity.class));
 	}
 
 	@Test
@@ -126,8 +124,7 @@ public class ApiFootballServiceTest {
 
 	@Test
 	public void shouldGetArsenalDefeatStatistics() {
-		Match fixtureStatistics = futechatService.getFixtureStatistics("Tottenham", "Arsenal",
-				LocalDate.of(2022, 5, 12));
+		Match fixtureStatistics = futechatService.getFixtureStatistics(710773);
 		assertNotNull(fixtureStatistics);
 		assertEquals(1, fixtureStatistics.awayTeamStatistics().redCards());
 	}

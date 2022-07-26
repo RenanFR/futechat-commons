@@ -87,6 +87,8 @@ public abstract class FutechatMapper {
 	
 	public abstract List<PlayerEntity> fromPlayerToPlayerEntityList(List<Player> players);
 	
+	public abstract Player fromPlayerEntityToPlayer(PlayerEntity playerEntity);
+	
 	public abstract List<Player> fromPlayerEntityToPlayerList(List<PlayerEntity> entities);
 	
 	@Mapping(target = "id", ignore = true)
@@ -106,6 +108,7 @@ public abstract class FutechatMapper {
 	
 	public abstract List<LeagueEntity> fromLeagueToLeagueEntityList(List<League> leagueList);
 	
+	@Mapping(target = "teams", ignore = true)
 	public abstract League fromLeagueEntityToLeague(LeagueEntity leagueEntity);
 	
 	public abstract List<League> fromLeagueEntityToLeagueList(List<LeagueEntity> list);

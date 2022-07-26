@@ -34,7 +34,6 @@ import br.com.futechat.commons.api.model.ApiFootballStatistics;
 import br.com.futechat.commons.api.model.ApiFootballStatisticsResponse;
 import br.com.futechat.commons.api.model.ApiFootballStatisticsType;
 import br.com.futechat.commons.api.model.ApiFootballTransfersResponse;
-import br.com.futechat.commons.exception.FixtureNotFoundException;
 import br.com.futechat.commons.exception.PlayerNotFoundException;
 import br.com.futechat.commons.mapper.FutechatMapper;
 import br.com.futechat.commons.model.League;
@@ -92,16 +91,14 @@ public class ApiFootballService extends FutechatService {
 	}
 
 	@Override
-	public PlayerTransferHistory getPlayerTransfers(String playerName, Team team) {
-		int teamId = team.getApiFootballId();
-		ApiFootballPlayer player = getPlayerByNameAndTeamId(playerName, teamId);
+	public PlayerTransferHistory getPlayerTransfers(Player player) {
 		ApiFootballResponse<ApiFootballTransfersResponse> transfers = apiFootballClient
-				.transfers(Map.of(PLAYER_PARAM, String.valueOf(player.id())));
+				.transfers(Map.of(PLAYER_PARAM, String.valueOf(player.getApiFootballId())));
 		PlayerTransferHistory playerTransferHistory = mapper
 				.fromApiFootballTransfersResponseToPlayerTransferHistory(transfers);
 		playerTransferHistory.transfers().sort(Comparator.comparing(Transfer::date));
-		return new PlayerTransferHistory(mapper.fromApiFootballPlayerToPlayer(player), playerTransferHistory.transfers());
-
+		return new PlayerTransferHistory(player,
+				playerTransferHistory.transfers());
 	}
 
 	@Override
@@ -179,21 +176,17 @@ public class ApiFootballService extends FutechatService {
 			
 			Match match = new Match(fixture.teams().home().name(), fixture.teams().away().name(), goalsHome, goalsAway,
 					LocalDateTime.parse(fixture.fixture().date(), DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-					fixture.fixture().status().longStatus(), events, fixture.fixture().referee(), null, null);
+					fixture.fixture().status().longStatus(), events, fixture.fixture().referee(), null, null, fixture.fixture().id());
 			return match;
 		};
 	}
 
 	@Override
-	public Match getFixtureStatistics(String homeTeam, String awayTeam, LocalDate matchDate) {
-		ApiFootballResponse<ApiFootballFixturesResponse> matchesOnThatDay = apiFootballClient
-				.fixtures(Map.of("date", matchDate.format(DateTimeFormatter.ofPattern(PATTERN))));
-		ApiFootballFixturesResponse soccerMatchFound = matchesOnThatDay.response().stream().filter(
-				match -> match.teams().home().name().equals(homeTeam) && match.teams().away().name().equals(awayTeam))
-				.findAny().orElseThrow(() -> new FixtureNotFoundException(homeTeam, awayTeam, matchDate));
-		Integer fixtureId = soccerMatchFound.fixture().id();
+	public Match getFixtureStatistics(Integer idOfTheFixture) {
 		List<ApiFootballStatisticsResponse> statisticsResponses = apiFootballClient
-				.fixturesStatistics(Map.of("fixture", fixtureId.toString())).response();
+				.fixturesStatistics(Map.of("fixture", idOfTheFixture.toString())).response();
+		String homeTeam = statisticsResponses.get(0).team().name();
+		String awayTeam = statisticsResponses.get(1).team().name();
 		Map<String, String> statisticsMapOfHomeTeam = statisticsResponses.stream()
 				.filter(statistics -> statistics.team().name().equals(homeTeam))
 				.map(statistics -> statistics.statistics()).flatMap(statistics -> statistics.stream())
@@ -207,11 +200,8 @@ public class ApiFootballService extends FutechatService {
 		
 		MatchStatistics statisticsOfHomeTeam = getStatisticsFromRawMap(statisticsMapOfHomeTeam);
 		MatchStatistics statisticsOfAwayTeam = getStatisticsFromRawMap(statisticsMapOfAwayTeam);
-		Match match = new Match(soccerMatchFound.teams().home().name(), soccerMatchFound.teams().away().name(),
-				soccerMatchFound.goals().home(), soccerMatchFound.goals().away(),
-				LocalDateTime.parse(soccerMatchFound.fixture().date(), DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-				soccerMatchFound.fixture().status().longStatus(), List.of(), soccerMatchFound.fixture().referee(),
-				statisticsOfHomeTeam, statisticsOfAwayTeam);
+		Match match = new Match(homeTeam, awayTeam, null, null, null, null, List.of(), null, statisticsOfHomeTeam,
+				statisticsOfAwayTeam, idOfTheFixture);
 		return match;
 	}
 

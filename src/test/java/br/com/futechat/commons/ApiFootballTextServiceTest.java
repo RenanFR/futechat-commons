@@ -99,7 +99,7 @@ public class ApiFootballTextServiceTest {
 	
 	@Test
 	public void shouldGetArsenalDefeatStatistics() {
-		String fixtureStatisticsText = apiFootballTextService.getFixtureStatistics("Tottenham", "Arsenal", LocalDate.of(2022, 5, 12));
+		String fixtureStatisticsText = apiFootballTextService.getFixtureStatistics(710773);
 		assertNotNull(fixtureStatisticsText);
 		assertTrue(fixtureStatisticsText.contains("Tottenham(3) X Arsenal(0):"));
 		assertTrue(fixtureStatisticsText.contains("Cartões vermelhos | 0 | 1"));

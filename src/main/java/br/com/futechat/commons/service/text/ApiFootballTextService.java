@@ -68,7 +68,7 @@ public class ApiFootballTextService implements FutechatTextService {
         List<Match> matches = apiFootballService.getSoccerMatches(leagueName, countryName, schedule);
         String soccerMatchesText = matches.stream().map(match -> {
             StringBuilder soccerMatchText = new StringBuilder();
-            soccerMatchText.append(match.homeTeam() + (match.homeScore() == null ? " "
+            soccerMatchText.append(match.apiFootballId() + ": " + match.homeTeam() + (match.homeScore() == null ? " "
                     : "(" + match.homeScore() + ") ") + "X " + match.awayTeam() + (match.awayScore() == null ? " "
                     : "(" + match.awayScore() + ") "));
             soccerMatchText.append("-> " + match.schedule().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
@@ -90,14 +90,13 @@ public class ApiFootballTextService implements FutechatTextService {
     }
 
     @Override
-    public String getFixtureStatistics(String homeTeam, String awayTeam, LocalDate matchDate) {
+    public String getFixtureStatistics(Integer idOfTheFixture) {
         try {
-            Match fixtureStatisticsMatch = apiFootballService.getFixtureStatistics(homeTeam, awayTeam,
-                    matchDate);
+            Match fixtureStatisticsMatch = apiFootballService.getFixtureStatistics(idOfTheFixture);
             StringBuilder fixtureStatisticsText = new StringBuilder();
             fixtureStatisticsText
-                    .append(fixtureStatisticsMatch.homeTeam() + "(" + fixtureStatisticsMatch.homeScore() + ") " + "X "
-                            + fixtureStatisticsMatch.awayTeam() + "(" + fixtureStatisticsMatch.awayScore() + ")" + ":\n");
+                    .append(fixtureStatisticsMatch.homeTeam() + " X "
+                            + fixtureStatisticsMatch.awayTeam() + ":\n");
             fixtureStatisticsText.append("Chutes no gol | " + fixtureStatisticsMatch.homeTeamStatistics().shotsOnGoal()
                     + " | " + fixtureStatisticsMatch.awayTeamStatistics().shotsOnGoal());
             fixtureStatisticsText.append("\n");

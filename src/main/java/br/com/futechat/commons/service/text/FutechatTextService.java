@@ -13,6 +13,6 @@ public interface FutechatTextService {
 	
 	String getSoccerMatches(Optional<String> leagueName, Optional<String> countryName, Optional<LocalDate> schedule);
 	
-	String getFixtureStatistics(String homeTeam, String awayTeam, LocalDate matchDate);
+	String getFixtureStatistics(Integer idOfTheFixture);
 
 }
