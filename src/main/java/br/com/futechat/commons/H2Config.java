@@ -38,7 +38,7 @@ public class H2Config {
 		entityManagerFactoryBean.setPackagesToScan("br.com.futechat.commons.entity");
 		entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 		entityManagerFactoryBean.setJpaPropertyMap(Map.of("hibernate.dialect", "org.hibernate.dialect.H2Dialect",
-				"hibernate.hbm2ddl.auto", "create", "hibernate.show_sql", "true"));
+				"hibernate.hbm2ddl.auto", "create-drop", "hibernate.show_sql", "true"));
 
 		return entityManagerFactoryBean;
 	}

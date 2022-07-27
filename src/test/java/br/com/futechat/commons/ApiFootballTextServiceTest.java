@@ -58,12 +58,6 @@ public class ApiFootballTextServiceTest {
 	}
 
 	@Test
-	public void whenNonExistingTeamIsSearchedThenExceptionTextShouldBeReturned() {
-		String playerTransferHistoryText = apiFootballTextService.getPlayerTransferHistory("Rogerio Vaughan", "ESPN");
-		assertEquals("O time ESPN nao foi encontrado", playerTransferHistoryText);
-	}
-	
-	@Test
 	public void whenNonExistingPlayerIsSearchedThenExceptionTextShouldBeReturned() {
 		String playerTransferHistoryText = apiFootballTextService.getPlayerTransferHistory("Rogerio Vaughan", "Paris Saint Germain");
 		assertEquals("O jogador Rogerio Vaughan nao foi encontrado", playerTransferHistoryText);
