@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>br.com.futechat</groupId>
 	<artifactId>futechat-commons</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.2-SNAPSHOT</version>
 	<name>futechat-commons</name>
 	<description>Biblioteca com os elementos comuns das aplicacoes futechat</description>
 	<packaging>jar</packaging>
