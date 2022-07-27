@@ -98,6 +98,30 @@ Como os Jobs fazem um número massivo de requisições e chamadas ao banco de da
 ```java
 @ConditionalOnProperty(prefix = "apiFootball", name = "playersSynchronizationEnabled", havingValue = "true")
 ```
+
+> br.com.futechat.commons.entity
+
+Mapeamento das entidades da Jpa relacionadas as tabelas do futechat
+
+> br.com.futechat.commons.exception
+
+Exceções customizadas lançadas ao longo das funcionalidades e cujo tratamento e interceptação visa entregar um feedback mais intuitivo e amigável ao usuário final em caso de erro
+
+> br.com.futechat.commons.mapper
+
+Utilizamos o mapstruct para mapeamento entre os diferentes DTOs da aplicação
+
+Temos os DTOs relacionados a requisição e resposta junto a API, os objetos de persistência e por fim os objetos da camada de negócio da aplicação. Eles são separados visando o desacoplamento entre as camadas e a `FutechatMapper` que é a abstração base provê a assinatura de mapeamento entre os objetos conforme anotações e convenções do  [mapstruct](https://www.baeldung.com/mapstruct) que por sua vez gera a implementação na pasta target
+
+> br.com.futechat.commons.service
+
+Nessa camada de negócio temos os serviços de alto nível da aplicação onde a abstração FutechatService provê o contrato das funcionalidades e sua única implementação até o momento que é ApiFootballService provê as mesmas com base no provedor de informação
+
+Como nossas funcionalidades são uma mescla de chamadas de API com informações do banco de dados interno , temos um Adapter de persistência que desacopla a interação com o banco de dados das interações com a API e nos permite evoluir e alterar essas camadas de maneira independente
+
+> br.com.futechat.commons.service.text
+
+É a camada responsável por concatenar as respostas como texto de acordo com cada funcionalidade, por exemplo o método getFixtureStatistics pega o objeto com os dados da estatística de uma partida e devolve uma String com um texto amigável para o usuário final com as métricas daquele jogo. Esse pacote funciona como a camada de apresentação ou front-end pois é o texto final que o usuário receberá após usar um comando do futechat, a existência dessa camada desacopla a apresentação do mecanismo subjacente que obtém os dados da funcionalidade em si e permite o reuso e uma maior legibilidade do código
 ## Pipeline de CI/CD
 A pipeline de CI/CD deste projeto consiste em uma instância ec2 que atua como servidor do Jenkins
 No Jenkins temos as seguintes etapas para publicação da biblioteca no Codeartifact
