@@ -13,7 +13,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlConfig;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
@@ -33,6 +38,9 @@ import br.com.futechat.commons.service.text.ApiFootballTextService;
 @SpringBootTest(classes = { ApiFootballService.class, ApiFootballTextService.class, FeignConfig.class,
 		ApiFootballAspect.class, AspectJConfig.class, FutechatMapperImpl.class, JPAPersistenceAdapter.class,
 		H2Config.class })
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql(scripts = {
+		"/player_sample_record.sql" }, config = @SqlConfig(encoding = "utf-8", dataSource = "h2DataSource", transactionManager = "transactionManager", transactionMode = TransactionMode.ISOLATED), executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 public class ApiFootballTextServiceTest {
 
 	@Rule
