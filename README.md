@@ -132,6 +132,27 @@ O mapeamento das requisições com os respectivos payloads estão localizados vi
 O DataSource do H2 é utilizado devido a configuração do Profile de testes
 
 Temos o arquivo `player_sample_record.sql` no pacote de testes que por meio da anotação `@Sql` insere alguns registros de teste no banco em memória
+### Execução local
+Para executar o projeto localmente é preciso configurar as variáveis de ambientes para se conectar a conta da aws onde estão localizados os parâmetros e demais componentes de infraestrutura da aplicação
+Podemos utilizar as variáveis de ambiente na configuração de execução da IDE
+- `AWS_ACCESS_KEY_ID`
+- `AWS_REGION`
+- `AWS_SECRET_ACCESS_KEY`
+
+Podemos também configurar um profile da aws na máquina local por meio do comando abaixo
+
+```sh
+aws configure --profile agama
+```
+
+Em seguida ao executar a aplicação usamos a variável `AWS_PROFILE` cujo valor será ágama
+Precisamos também da variável de ambiente `CODEARTIFACT_AUTH_TOKEN` que permite se comunicar com o repositório de artefatos na nuvem
+Ele pode ser obtido por meio do comando abaixo
+
+```sh
+aws codeartifact get-authorization-token --domain agama --domain-owner 270167558056 --query authorizationToken --output text --region us-east-1 --profile agama
+```
+
 ## Pipeline de CI/CD
 A pipeline de CI/CD deste projeto consiste em uma instância ec2 que atua como servidor do Jenkins
 No Jenkins temos as seguintes etapas para publicação da biblioteca no Codeartifact
