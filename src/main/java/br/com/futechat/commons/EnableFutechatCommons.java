@@ -27,7 +27,7 @@ import br.com.futechat.commons.batch.TeamsDBSyncJob;
 		LeaguesDBSyncJob.class, PlayersDBSyncJob.class, ApiFootballLeagueReader.class, ApiFootballLeagueWriter.class,
 		ApiFootballLeagueProcessor.class, ApiFootballTeamReader.class, ApiFootballTeamProcessor.class,
 		ApiFootballTeamWriter.class, ApiFootballPlayerReader.class, ApiFootballPlayerProcessor.class,
-		ApiFootballPlayerWriter.class })
+		ApiFootballPlayerWriter.class, FlywayConfig.class })
 public @interface EnableFutechatCommons {
 
 }

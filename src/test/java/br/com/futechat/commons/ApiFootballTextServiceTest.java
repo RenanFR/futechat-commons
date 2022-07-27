@@ -25,12 +25,14 @@ import br.com.futechat.commons.aspect.ApiFootballAspect;
 import br.com.futechat.commons.aspect.AspectJConfig;
 import br.com.futechat.commons.mapper.FutechatMapperImpl;
 import br.com.futechat.commons.service.ApiFootballService;
+import br.com.futechat.commons.service.JPAPersistenceAdapter;
 import br.com.futechat.commons.service.text.ApiFootballTextService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ActiveProfiles("test")
 @SpringBootTest(classes = { ApiFootballService.class, ApiFootballTextService.class, FeignConfig.class,
-		ApiFootballAspect.class, AspectJConfig.class, FutechatMapperImpl.class })
+		ApiFootballAspect.class, AspectJConfig.class, FutechatMapperImpl.class, JPAPersistenceAdapter.class,
+		H2Config.class })
 public class ApiFootballTextServiceTest {
 
 	@Rule
@@ -101,7 +103,7 @@ public class ApiFootballTextServiceTest {
 	public void shouldGetArsenalDefeatStatistics() {
 		String fixtureStatisticsText = apiFootballTextService.getFixtureStatistics(710773);
 		assertNotNull(fixtureStatisticsText);
-		assertTrue(fixtureStatisticsText.contains("Tottenham(3) X Arsenal(0):"));
+		assertTrue(fixtureStatisticsText.contains("Tottenham X Arsenal:"));
 		assertTrue(fixtureStatisticsText.contains("Cartões vermelhos | 0 | 1"));
 	}
 

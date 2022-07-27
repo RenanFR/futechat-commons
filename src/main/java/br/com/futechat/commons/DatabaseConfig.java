@@ -52,14 +52,5 @@ public class DatabaseConfig {
 	public PlatformTransactionManager platformTransactionManager(EntityManagerFactory entityManagerFactory) {
 		return new JpaTransactionManager(entityManagerFactory);
 	}
-	
-	@Bean(initMethod = "migrate")
-	public Flyway flyway() {
-		ClassicConfiguration flywayConfiguration = new ClassicConfiguration();
-		flywayConfiguration.setBaselineOnMigrate(true);
-		flywayConfiguration.setDataSource(dataSource());
-		Flyway flyway = new Flyway(flywayConfiguration);
-		return flyway;
-	}
 
 }

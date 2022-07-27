@@ -1,0 +1,17 @@
+spring: 
+#  sql.init.mode: always
+  jpa: 
+#    defer-datasource-initialization: true
+    show-sql: true
+    hibernate:
+#      ddl-auto: none
+#      ddl-auto: create-drop
+      ddl-auto: create
+  datasource:
+#    defer-datasource-initialization: always
+#    initialization-mode: always
+    data: classpath:/data.sql
+    platform: h2
+#  sql:
+#    init:
+#      mode: always
