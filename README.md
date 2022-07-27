@@ -1,3 +1,103 @@
+## Componentes de código
+> br.com.futechat.commons
+
+O pacote de configuração conta com a definição programática da conexão com os dois bancos de dados, sendo um deles o RDS com PostgreSQL e o H2 para o escopo de testes
+Utilizamos um Bean do tipo `DataSource` criado a partir das propriedades obtidas do Parameter Store. Nas classes `DatabaseConfig` e `H2Config` também é feita a localização do pacote contendo as entidades Jpa do projeto, bem como definição de propriedades do hibernate e criação do `TransactionManager` que é o objeto responsável por gerir as transações com o banco de dados
+```java
+	@Bean(name = "rdsDataSource")
+	@ConfigurationProperties(prefix = "spring.datasource")
+	@Primary
+	public DataSource dataSource() {
+		return DataSourceBuilder.create().build();
+	}
+```
+A configuração do [Flyway](https://www.baeldung.com/database-migrations-with-flyway) que é a ferramenta de versionamento e evolução de schema do banco de dados também está no pacote de configurações. Por convenção o spring localiza os arquivos de migração dentro de db/migration
+Nesse pacote encontramos também a anotação customizada `EnableFutechatCommons`, responsável por expor a aplicação que importar a biblioteca os objetos e configurações apropriados
+
+> br.com.futechat.commons.api.client
+
+Nesse pacote temos a configuração do Client de API
+Atualmente nosso principal provedor de informação relacionado ao mundo do futebol é o [API-FOOTBALL](https://www.api-football.com/) que é uma API REST que provê dados atualizados de diversas ligas ao redor do mundo, lá encontramos endpoints para diversos tipos de dados como estatísticas de uma partida, atributos de jogadores, informações sobre ligas e times, etc.
+Temos uma subscrição no [RapidAPI](https://rapidapi.com/api-sports/api/api-football) que é um hub de APIs onde podemos aderir e gerir de forma centralizada a assinatura de APIs dos mais diversos tipos e provedores. A subscrição nos dá direito a uma chave de consumo ou API key através da qual usufruímos de nossa cota de requisições contratada no plano escolhido
+Dentro do arquivo `ApiFootballClient` temos os endpoints atualmente consumidos necessários para prover as funcionalidades disponíveis do futechat. O Feign nos permite mapear os endpoints de maneira sucinta e elegante por meio de anotações e assinatura de método, o tipo de retorno, verbo HTTP, path, parâmetros e tipos de retorno estão todos mapeados conforme a [documentação](https://www.api-football.com/documentation-v3) do provedor
+Em `FeignConfig` temos o interceptador responsável por adicionar no header da requisição a Key de autorização para consumo da API bem como o host, por sua vez esses parâmetros são obtidos na conta da aws
+> br.com.futechat.commons.api.model
+
+O pacote model contém os DTOs relacionados a requisição e resposta do API-FOOTBALL conforme os atributos listados na documentação e no estilo record do Java
+
+> br.com.futechat.commons.aspect
+
+Nesse pacote habilitamos o AspectJ que nos permite utilizar o paradigma AOP
+Em nosso caso o comportamento transversal adicionado é a interceptação dos métodos relacionados as funcionalidades dos comandos do Futechat no qual ao se deparar com as exceções customizadas lançadas quando uma liga, time ou jogador não são encontrados alteramos a resposta para apresentar um texto amigável ao usuário informando tal situação
+Estamos em resumo utilizando AOP basicamente para o tratamento global de erros desse tipo na aplicação de maneira a minimizar os pontos de código em que teríamos que tratar as situações em que uma informação não é encontrada e alterar a resposta correspondente ao usuário
+Os métodos interceptados são definidos pela expressão abaixo
+```java
+	@Pointcut("execution(* br.com.futechat.commons.service.text.*.*(..))")
+	private void whenToCall() {
+	}
+```
+
+> br.com.futechat.commons.batch
+
+Fazemos uso do Spring Batch que é um módulo do framework responsável por facilitar a criação e gestão de Jobs de processamento em lote
+Nosso caso de uso é a sincronização dos dados de ligas, times e jogadores provenientes da API do provedor para o nosso banco de dados RDS. Essa sincronização se dá por uma série de razões, dentre elas:
+- Economia do número de chamadas para a API
+    - Uma vez que somos cobrados por quantidade de chamadas a API com base em nossa cota de uso definida na subscrição é mister que tenhamos alguns dos dados de entidades que não sofrem grande alteração em nosso banco de dados interno ao invés de fazer a requisição HTTP a todo momento
+- Otimização do tempo de resposta
+    - Devido ao fato de que algumas funcionalidades exigem mais de uma chamada a API para concatenar informações e devido a algumas requisições serem chamadas com base nos Ids internos da API a iniciativa de manter uma base de dados própria se faz necessária para reduzir o número de requisições HTTP e tornar o tempo de resposta mais ágil
+- Escalabilidade, cruzamento de informações e redução de dependência com o provedor de informação
+    - Manter e evoluir uma base de dados própria nos permite oferecer algumas funcionalidades sem depender de nosso provedor de informação que é a API. Também nos permite cruzar informações caso tenhamos uma funcionalidade que depende de dados obtidos de mais de um provedor, além disso nos permite trocar ou adicionar provedores externos de informação a nossa aplicação de maneira mais ágil possibilitando funcionalidades cada vez mais robustas
+
+Na classe `BatchConfig` temos a configuração das tabelas internas do Spring Batch que serão criadas a partir dos arquivos sql de schema no postgresql
+Temos uma extensão de `BatchConfigurer` para customizar e vincular nosso `DataSource` e `TransactionManager` de forma que os mesmos sejam usados dentro dos Jobs de persistência
+Temos três Jobs
+- `LeaguesDBSyncJob`
+- `TeamsDBSyncJob`
+- `PlayersDBSyncJob`
+
+Respectivamente responsáveis pela sincronização das tabelas de ligas ou campeonatos, times de futebol e jogadores
+Os dois primeiros são baseados em Tasklet (Modalidade onde uma task é completada em um step de forma atômica e cada task é responsável por um único step) e o terceiro foi implementado na modalidade de chunks (Onde os dados são divididos em vários pedaços e processados de maneira separadas em ciclos)
+Para times e ligas como somos capazes de obter toda a lista com uma única requisição HTTP a abordagem de Tasklet executa os passos do Job (Leitura, processamento e saída) uma única vez. Já para jogadores temos um dataset massivo onde cada liga possui centenas ou milhares de jogadores e até por isso essa requisição é paginada, dessa forma a abordagem de chunks que processa separadamente porções de dados e repete o ciclo do Job para cada uma dessas porções se mostrou mais adequado 
+```java
+	@Bean(name = "leaguePlayersUpdateStep")
+	public Step leaguePlayersUpdateStep(ItemReader<List<Player>> reader,
+			ItemProcessor<List<Player>, List<Player>> processor, ItemWriter<List<Player>> writer) {
+		return stepBuilderFactory.get("leaguePlayersUpdateStep").<List<Player>, List<Player>>chunk(1).reader(reader)
+				.processor(processor).writer(writer).build();
+	}
+```
+O tamanho do chunk é definido como 1 pois processaremos os jogadores de uma liga por vez
+Na etapa de leitura presente em ApiFootballPlayerReader temos uma fila ou Queue com as ligas observadas (Uma vez que carregaremos apenas jogadores de ligas específicas de interesse pois seria inviável carregar todos os jogadores de todas as ligas do mundo). Na inicialização do Reader carregamos as ligas de interesse que por sua vez estão parametrizadas no Parameter Store (Dessa forma podemos escolher de maneira mais dinâmica de quais ligas iremos carregar os jogadores). A cada leitura é feito o poll que recupera e remove a liga atual da Queue e com base nela fazemos a requisição paginada dos jogadores junto ao API-FOOTBALL
+
+```java
+	private Queue<League> observedLeagues;
+	
+	@Autowired
+	public ApiFootballPlayerReader(ApiFootballService apiFootballService) {
+		this.apiFootballService = apiFootballService;
+		this.observedLeagues = new LinkedList<>(apiFootballService.getLeaguesOfInterest());
+	}
+
+	@Override
+	public List<Player> read()
+			throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+		Optional<League> currentLeague = Optional.ofNullable(this.observedLeagues.poll());
+		if (currentLeague.isPresent()) {
+			
+			List<Player> playersFromLeague = apiFootballService.getPlayersFromLeague(currentLeague.get().getApiFootballId());
+			LOGGER.info("{} players were found from the league {}", playersFromLeague.size(), currentLeague.get().getApiFootballId());
+			return playersFromLeague;
+		}
+		return null;
+	}
+```
+
+No Processor filtramos os registros que já existem no banco de dados e no Writer finalmente fazemos a persistência dos restantes
+Como os Jobs fazem um número massivo de requisições e chamadas ao banco de dados há um mecanismo de Feature Flag com base na linha abaixo
+
+```java
+@ConditionalOnProperty(prefix = "apiFootball", name = "playersSynchronizationEnabled", havingValue = "true")
+```
 ## Pipeline de CI/CD
 A pipeline de CI/CD deste projeto consiste em uma instância ec2 que atua como servidor do Jenkins
 No Jenkins temos as seguintes etapas para publicação da biblioteca no Codeartifact
