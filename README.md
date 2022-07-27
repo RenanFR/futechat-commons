@@ -122,6 +122,16 @@ Como nossas funcionalidades são uma mescla de chamadas de API com informações
 > br.com.futechat.commons.service.text
 
 É a camada responsável por concatenar as respostas como texto de acordo com cada funcionalidade, por exemplo o método getFixtureStatistics pega o objeto com os dados da estatística de uma partida e devolve uma String com um texto amigável para o usuário final com as métricas daquele jogo. Esse pacote funciona como a camada de apresentação ou front-end pois é o texto final que o usuário receberá após usar um comando do futechat, a existência dessa camada desacopla a apresentação do mecanismo subjacente que obtém os dados da funcionalidade em si e permite o reuso e uma maior legibilidade do código
+### Testes
+Na camada de testes usamos o WireMock para simular respostas da API do provedor e testar a camada de serviço de maneira isolada
+
+Os payloads estáticos para teste estão localizados e são encontrados via convenção no diretório __files
+
+O mapeamento das requisições com os respectivos payloads estão localizados via convenção no diretório mappings
+
+O DataSource do H2 é utilizado devido a configuração do Profile de testes
+
+Temos o arquivo `player_sample_record.sql` no pacote de testes que por meio da anotação `@Sql` insere alguns registros de teste no banco em memória
 ## Pipeline de CI/CD
 A pipeline de CI/CD deste projeto consiste em uma instância ec2 que atua como servidor do Jenkins
 No Jenkins temos as seguintes etapas para publicação da biblioteca no Codeartifact
